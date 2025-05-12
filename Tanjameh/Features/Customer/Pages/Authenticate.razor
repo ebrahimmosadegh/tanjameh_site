@@ -1,0 +1,99 @@
+﻿@page "/authenticate"
+
+@layout AccountLayout
+
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Components;
+@using Microsoft.AspNetCore.Components.Forms;
+@using System.ComponentModel.DataAnnotations;
+@using Tanjameh.Features.Account
+@using Tanjameh.Features.Account.Shared
+@using Tanjameh.Features.Customer.Models
+@using Tanjameh.Features.ShoppingCart.Services
+
+@inject Tanjameh.Features.Customer.Services.AuthenticationService AuthService
+@inject ILogger<Login> Logger
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject ProtectedSessionStorage ProtectedSessionStore
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="text-center">ورود یا ثبت نام</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    <EditForm Model="@Input" method="post" OnValidSubmit="HandleLogin" FormName="Authenticate">
+                        <DataAnnotationsValidator />
+
+
+                        <div class="form-group  mb-3">
+                            <label for="email">@Localization.Email</label>
+                            <InputText id="email" class="form-control" @bind-Value="Input.Email" autocomplete="username" aria-required="true" />
+                            <ValidationMessage For="@(() => Input.Email)" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block mt-3">@Localization.Continue</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public const string SuccessLogin = "SuccessLogin";
+
+    [SupplyParameterFromForm]
+    private AuthenticateModel Input { get; set; } = new();
+
+    private string errorMessage;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            // Clear the existing external cookie to ensure a clean login process
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        errorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(Input.Email))
+        {
+            errorMessage = "لطفاً ایمیل خود را وارد کنید.";
+            return;
+        }
+
+        var result = await AuthService.CheckUserExsit(Input.Email);
+
+        if (result)
+        {
+            RedirectManager.RedirectTo("account/login?new=1&email=" + Input.Email.ToLower());
+        }
+        else
+        {
+            RedirectManager.RedirectTo("account/register?new=1&email=" + Input.Email.ToLower());
+        }
+
+    }
+}

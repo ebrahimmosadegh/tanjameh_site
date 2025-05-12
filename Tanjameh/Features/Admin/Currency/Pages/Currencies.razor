@@ -1,0 +1,76 @@
+﻿@page "/admin/currency"
+
+<PageTitle>واحد های ارز</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="Currencies" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="false" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="false" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@currencies" RowUpdate="@GridRowUpdate" RowCreate="@GridRowCreate" TItem="Core.Entities.Currency">
+            <Columns>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="Id" Title="Id">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="CurrencyCode" Title="کد">
+                  <EditTemplate Context="currency">
+                      <RadzenTextBox ReadOnly="@Editing" style="display: block; width: 100%" @bind-Value="@currency.CurrencyCode" Name="CurrencyCode" />
+                      <RadzenRequiredValidator Component="CurrencyCode" Text="CurrencyCode is required" style="position: absolute;" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="CurrencyName" Title="نام">
+                  <EditTemplate Context="currency">
+                      <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.CurrencyName" Name="CurrencyName" />
+                      <RadzenRequiredValidator Component="CurrencyName" Text="CurrencyName is required" style="position: absolute;" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="Description" Title="توضیحات">
+                  <EditTemplate Context="currency">
+                      <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.Description" Name="Description" />
+                      <RadzenRequiredValidator Component="Description" Text="Description is required" style="position: absolute;" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="CurrencySign" Title="علامت">
+                  <EditTemplate Context="currency">
+                      <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.CurrencySign" Name="CurrencySign" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="CustomStringFormat" Title="Custom String Format">
+                  <EditTemplate Context="currency">
+                      <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.CustomStringFormat" Name="CustomStringFormat" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Property="DefaultCultureName" Title="Default Culture Name">
+                  <EditTemplate Context="currency">
+                      <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currency.DefaultCultureName" Name="DefaultCultureName" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.Currency" Filterable="false" Sortable="false" Width="156px" TextAlign="TextAlign.Center">
+                    <EditTemplate Context="currency">
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                            style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                            Click=@(args => SaveButtonClick(args, currency)) @onclick:stopPropagation="true" />
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                            Click=@(args => CancelButtonClick(args, currency)) @onclick:stopPropagation="true" />
+                    </EditTemplate>
+                    <Template Context="currency">
+
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                            style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                            Click=@(args => EditButtonClick(args, currency)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>

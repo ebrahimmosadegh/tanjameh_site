@@ -1,0 +1,159 @@
+﻿@page "/account/register"
+@layout AccountLayout
+
+@using Tanjameh.Core.Entities
+@using Tanjameh.Features.Account
+@using Tanjameh.Features.Account.Shared
+@using Tanjameh.Features.Customer.Models
+@using Tanjameh.Features.Customer.Services
+
+@inject AuthenticationService AuthService
+@inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
+@inject IJSRuntime JSRuntime
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="text-center">@Localization.RegisterTitle</h3>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    <EditForm Model="@RegistrationModel" OnValidSubmit="HandleRegistration" FormName="register-form">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mx-auto">
+
+                            <div class="form-row">
+                                <div class="form-group mb-2 col-md-6">
+                                    <label for="email">@Localization.Email</label>
+                                    <InputText id="email" class="form-control" @bind-Value="RegistrationModel.Email" />
+                                    <ValidationMessage For="@(() => RegistrationModel.Email)" />
+                                </div>
+                                <div class="form-group mb-2 col-md-6">
+                                    <label for="password">@Localization.Password</label>
+                                    <div class="input-group">
+                                        <InputText type="password" id="password" class="form-control" @bind-Value="RegistrationModel.Password" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePasswordVisibility()">
+                                                <i class="fas fa-eye" id="togglePasswordIcon"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <ValidationMessage For="@(() => RegistrationModel.Password)" />
+                                </div>
+                            </div>
+
+
+                            <div class="form-row">
+                                <div class="form-group mb-2 col-md-6">
+                                    <label for="firstName">@Localization.FirstName</label>
+                                    <InputText id="firstName" class="form-control" @bind-Value="RegistrationModel.FirstName" />
+                                    <ValidationMessage For="@(() => RegistrationModel.FirstName)" />
+                                </div>
+                                <div class="form-group mb-2 col-md-6">
+                                    <label for="lastName">@Localization.LastName</label>
+                                    <InputText id="lastName" class="form-control" @bind-Value="RegistrationModel.LastName" />
+                                    <ValidationMessage For="@(() => RegistrationModel.LastName)" />
+                                </div>
+                            </div>
+
+
+                        </div>
+
+
+                        <button type="submit" class="btn btn-primary btn-block mt-3">@Localization.Register</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery(Name = "email")]
+    private string? Email { get; set; }
+
+    [SupplyParameterFromQuery(Name = "new")]
+    private int? IsNew { get; set; }
+
+
+    [SupplyParameterFromForm]
+    private RegistrationModel RegistrationModel { get; set; } = new();
+
+    private string? errorMessage = null;
+
+    protected async override Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Email))
+        {
+            RegistrationModel.Email = Email;
+        }
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+
+    }
+
+
+    private async Task HandleRegistration()
+    {
+        var customer = new Core.Entities.Customer
+            {
+                FirstName = RegistrationModel.FirstName,
+                LastName = RegistrationModel.LastName,
+                // PhoneNumber = RegistrationModel.PhoneNumber,
+                // Country = RegistrationModel.Country,
+                IsActive = true,
+                CreatedTime = DateTime.UtcNow,
+                //     CustomerAddresses = new List<CustomerAddress>
+                // {
+                //     new CustomerAddress
+                //     {
+                //         Address = RegistrationModel.Address,
+                //         City = RegistrationModel.City,
+                //         Country = RegistrationModel.Country,
+                //         ZipCode = RegistrationModel.ZipCode,
+                //         IsDefault = true,
+                //         CreatedTime = DateTime.UtcNow
+                //     }
+                // }
+            };
+
+        var result = await AuthService.RegisterUserAsync(RegistrationModel.Email, RegistrationModel.Password, customer);
+
+        if (result.Succeeded)
+        {
+            RedirectManager.RedirectTo("/");
+        }
+        else
+        {
+            errorMessage = result.Errors.FirstOrDefault()?.Description;
+        }
+    }
+}
+
+<script>
+        function togglePasswordVisibility() {
+        var passwordInput = document.getElementById('password');
+        var toggleIcon = document.getElementById('togglePasswordIcon');
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        }
+    }
+</script>

@@ -1,0 +1,29 @@
+﻿@page "/women"
+@using Tanjameh.Features.Advers.Components
+@using Tanjameh.Features.BrandAndType.Components
+@using Tanjameh.Features.BrandAndType.Models
+
+
+<PageTitle>تن جامه - زنانه</PageTitle>
+
+
+@foreach (var item in Banners)
+{
+    <section>
+        <AdverBannerType1 BannerData="item" />
+    </section>
+}
+
+
+<section>
+    <BrandSectionType BrandRequestType="BrandRequestType.Brand" Title="برندهای زنانه" AdditionalUrl="?gender=women" />
+</section>
+
+<section>
+    <BrandSectionType BrandRequestType="BrandRequestType.ProductType" Title="دسته بندی زنانه" AdditionalUrl="?gender=women" />
+</section>
+
+
+
+
+

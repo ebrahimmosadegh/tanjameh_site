@@ -1,0 +1,79 @@
+﻿@page "/admin/weight/product-price"
+
+<PageTitle>قیمت وزن محصول</PageTitle>
+<RadzenStack>
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@errorText</RadzenAlert>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="قیمت وزن محصول" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow>
+        <RadzenColumn SizeMD=12>
+            <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="false" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="false" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+                            Data="@productWeightPrices" RowUpdate="@GridRowUpdate" RowCreate="@GridRowCreate" TItem="Core.Entities.ProductWeightPrice">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Core.Entities.ProductWeightPrice" Property="Id" Title="Id">
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Core.Entities.ProductWeightPrice" Property="Weight.Weight" Title="وزن">
+                        <EditTemplate Context="productWeightPrice">
+                            <RadzenDropDown Data="@WeightSourcesForWeightId" TextProperty="Weight" ValueProperty="Id" AllowClear=false
+                                            Placeholder="وزن" style="display: block; width: 100%" @bind-Value="@productWeightPrice.WeightId" Name="WeightId" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+
+
+                    <RadzenDataGridColumn TItem="Core.Entities.ProductWeightPrice" Property="NormalPrice" Title="Normal Price">
+                        <EditTemplate Context="productWeightPrice">
+                            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@productWeightPrice.NormalPrice" Name="NormalPrice" />
+                            <RadzenRequiredValidator Component="NormalPrice" Text="Weight is required" style="position: absolute;" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+                    <RadzenDataGridColumn TItem="Core.Entities.ProductWeightPrice" Property="ExtraPrice" Title="Extra Price">
+                        <EditTemplate Context="productWeightPrice">
+                            <RadzenNumeric style="display: block; width: 100%" @bind-Value="@productWeightPrice.ExtraPrice" Name="ExtraPrice" />
+                            <RadzenRequiredValidator Component="ExtraPrice" Text="Weight is required" style="position: absolute;" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+         
+                    <RadzenDataGridColumn TItem="Core.Entities.ProductWeightPrice" Property="Currency.CurrencyCode" Title="واحد ارز">
+                        <EditTemplate Context="productWeightPrice">
+                            <RadzenDropDown Data="@currenciesForCurrencyId" TextProperty="CurrencyCode" ValueProperty="Id" AllowClear=false
+                                            Placeholder="انتخاب ارز " style="display: block; width: 100%" @bind-Value="@productWeightPrice.CurrencyId" Name="CurrencyId" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+
+
+                    <RadzenDataGridColumn TItem="Core.Entities.ProductWeightPrice" Filterable="false" Sortable="false" Width="156px" TextAlign="TextAlign.Center">
+                        <EditTemplate Context="productWeightPrice">
+                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                                          style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                                          Click=@(args => SaveButtonClick(args, productWeightPrice)) @onclick:stopPropagation="true" />
+                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                                          Click=@(args => CancelButtonClick(args, productWeightPrice)) @onclick:stopPropagation="true" />
+                        </EditTemplate>
+
+                        <Template Context="productWeightPrice">
+
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                                          style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                                          Click=@(args => EditButtonClick(args, productWeightPrice)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+
+                </Columns>
+
+            </RadzenDataGrid>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>

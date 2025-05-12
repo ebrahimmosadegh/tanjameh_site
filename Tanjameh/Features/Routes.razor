@@ -1,0 +1,20 @@
+﻿@using Tanjameh.Features.Account.Shared
+@using Tanjameh.Features.Shared.Pages
+
+<Router AppAssembly="typeof(Program).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Shared.Layout.MainLayout)">
+            <NotAuthorized>
+                <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(Shared.Layout.MainLayout)">
+            <NotFound/>
+        </LayoutView>
+    </NotFound>
+</Router>
+

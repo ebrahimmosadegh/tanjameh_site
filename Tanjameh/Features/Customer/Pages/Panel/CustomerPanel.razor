@@ -1,0 +1,68 @@
+@page "/customer/panel"
+@page "/customer/panel/{Section}"
+@attribute [Authorize]
+
+@using Microsoft.AspNetCore.Components
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            <h4>My Account</h4>
+            <nav class="nav flex-column nav-pills">
+                <NavLink class="nav-link" href="/customer/panel/orders" Match="NavLinkMatch.All">Order History</NavLink>
+                <NavLink class="nav-link" href="/customer/panel/addresses" Match="NavLinkMatch.All">Addresses</NavLink>
+                <NavLink class="nav-link" href="/customer/panel/details" Match="NavLinkMatch.All">Personal Details</NavLink>
+                <NavLink class="nav-link" href="/customer/panel/wishlist" Match="NavLinkMatch.All">Wishlist</NavLink>
+                @* Add Logout link/button if needed *@
+            </nav>
+        </div>
+        <div class="col-md-9">
+            @* Render the selected section based on the route parameter *@
+            @switch (Section?.ToLower())
+            {
+                case "orders":
+                    <OrderHistory />
+                    break;
+                case "addresses":
+                    <AddressManagement />
+                    break;
+                case "details":
+                    <PersonalDetails />
+                    break;
+                case "wishlist":
+                    <Wishlist />
+                    break;
+                default:
+                    @* Default view, maybe overview or redirect to orders *@
+                    <OrderHistory />
+                    break;
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? Section { get; set; }
+
+    // Placeholder components - these need to be created
+    private RenderFragment OrderHistory =@<p>Order History Component Placeholder</p>;
+    private RenderFragment AddressManagement =@<p>Address Management Component Placeholder</p>;
+    private RenderFragment PersonalDetails =@<p>Personal Details Component Placeholder</p>;
+    private RenderFragment Wishlist =@<p>Wishlist Component Placeholder</p>;
+
+    protected override void OnParametersSet()
+    {
+        // Ensure Section defaults if null or empty
+        if (string.IsNullOrEmpty(Section))
+        {
+            Section = "orders"; // Default to orders section
+        }
+        // Update RenderFragments to point to actual components once created
+        // Example:
+        // OrderHistory = builder => { builder.OpenComponent<Tanjameh.Features.Customer.Pages.Panel.OrderHistory>(0); builder.CloseComponent(); };
+        // AddressManagement = builder => { builder.OpenComponent<Tanjameh.Features.Customer.Pages.Panel.AddressManagement>(0); builder.CloseComponent(); };
+        // PersonalDetails = builder => { builder.OpenComponent<Tanjameh.Features.Customer.Pages.Panel.PersonalDetails>(0); builder.CloseComponent(); };
+        // Wishlist = builder => { builder.OpenComponent<Tanjameh.Features.Customer.Pages.Panel.Wishlist>(0); builder.CloseComponent(); };
+    }
+}
+

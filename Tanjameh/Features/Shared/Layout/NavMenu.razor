@@ -1,0 +1,185 @@
+﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Tanjameh.Features.Category.Components
+@using Tanjameh.Features.Category.Models
+@using Tanjameh.Features.Customer.Components
+@using Tanjameh.Features.Customer.Pages
+@using Tanjameh.Features.Search.Components
+@using Tanjameh.Features.ShoppingCart.Components
+@using Tanjameh.Features.ShoppingCart.Services
+@using Tanjameh.Features.Favorite.Components
+@implements IDisposable
+
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<!-- nav bar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-lg">
+        <div class="flex-fill d-none d-lg-flex">
+            <ul class="navbar-nav fw-bold">
+                <li class="nav-item mx-1">
+                    <a class="nav-link nav-hover @(CheckBasePage("men")? "bg-dark text-light":"")" href="./men">مردانه</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-hover @(CheckBasePage("women")? "bg-dark text-light":"")" href="./women">زنانه</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link nav-hover @(CheckBasePage("sale")? "bg-dark text-light":"")" href="./sale">حراج</a>
+                </li>
+                <!-- Admin Link -->
+                <AuthorizeView Roles="Admin">
+                    <li class="nav-item mx-1">
+                        <a class="nav-link nav-hover" href="./admin">Admin Panel</a>
+                    </li>
+                </AuthorizeView>
+            </ul>
+        </div>
+        <div class="flex-fill text-start text-lg-center">
+            <a class="navbar-brand" href="#">
+                <img src="images/logo.png" alt="Logo" class="d-inline-block align-text-top">
+            </a>
+        </div>
+        <div class="flex-fill dropdhover">
+            <ul class="navbar-nav float-end flex-row">
+                <!-- account -->
+                <li class="nav-item dropdown b-drop">
+                    <UserInfoPopup />
+                </li> 
+                <!-- wishlist -->
+                <li class="nav-item b-drop position-relative">
+                    <NavbarFavoriteComponent />
+                </li>
+                <!-- cart -->
+                <li class="cart nav-item b-drop position-relative">
+                    <NavbarCartComponent />
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- menu bar -->
+<nav class="navbar navbar-expand-lg menu p-0 border-bottom">
+
+    <div class="container-lg">
+        <a class="btn border-dark-subtle d-lg-none" data-bs-toggle="offcanvas" href="#offcanvasHome" role="button" aria-controls="offcanvasHome">
+            <svg class="zds-icon RC794g X9n9TI DlJ4rT _5Yd-hZ pVrzNP H3jvU7" height="1em" width="1em" focusable="false" fill="currentColor" viewBox="0 0 24 24" aria-labelledby="menu-6594495" role="img" aria-hidden="false">
+                <title id="menu-6594495">Menu</title>
+                <path d="M.75 2.25h22.5a.75.75 0 0 0 0-1.5H.75a.75.75 0 0 0 0 1.5zM23.25 21.75H.75a.75.75 0 0 0 0 1.5h22.5a.75.75 0 0 0 0-1.5zM.75 12.75h12a.75.75 0 0 0 0-1.5h-12a.75.75 0 0 0 0 1.5z">
+                </path>
+            </svg>
+        </a>
+        @if (CheckBasePage("men"))
+        {
+            <NavMenuCategory HomeMenuType="HomeMenuType.Men" />
+        }
+        else if (CheckBasePage("women"))
+        {
+            <NavMenuCategory HomeMenuType="HomeMenuType.Women" />
+        }
+        else if (currentUrl.StartsWith("sale", StringComparison.OrdinalIgnoreCase))
+        {
+            <NavMenuCategory HomeMenuType="HomeMenuType.Sale" />
+        }
+        else
+        {
+            <div id="men-menu" class="d-lg-block d-none">
+                <ul class="navbar-nav">
+                </ul>
+            </div>
+        }
+
+        <!-- search all website -->
+        <div>
+            <SearchBox />
+        </div>
+    </div>
+</nav>
+<!-- offcanvas mobile view  -->
+<div class="offcanvas offcanvas-start cat-offcanvas" tabindex="-1" id="offcanvasHome" aria-labelledby="offcanvasHomeLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasHomeLabel">پیمایش در دسته بندی</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <hr class="m-0">
+    <div class="offcanvas-body p-0 overflow-y-scroll overflow-x-hidden">
+        <nav>
+            <div class="nav nav-pills nav-justified" id="nav-tab" role="tablist">
+                <button class="nav-link active text-black-50 rounded-0" id="nav-men-tab" data-bs-toggle="tab" data-bs-target="#nav-men" type="button" role="tab" aria-controls="nav-men" aria-selected="false">مردانه</button>
+                <div class="vr"></div>
+                <button class="nav-link text-black-50 rounded-0" id="nav-women-tab" data-bs-toggle="tab" data-bs-target="#nav-women" type="button" role="tab" aria-controls="nav-women" aria-selected="true">زنانه</button>
+                <div class="vr"></div>
+                <button class="nav-link text-black-50 rounded-0" id="nav-sale-tab" data-bs-toggle="tab" data-bs-target="#nav-sale" type="button" role="tab" aria-controls="nav-sale" aria-selected="true">حراج</button>
+                @*                 <div class="vr"></div>
+                <button class="nav-link text-black-50 rounded-0" id="nav-kids-tab" data-bs-toggle="tab" data-bs-target="#nav-kids" type="button" role="tab" aria-controls="nav-kids" aria-selected="false">بچگانه</button> *@
+            </div>
+        </nav>
+        <div class="tab-content shadow-sm" id="nav-tabContent">
+            <div class="tab-pane fade show active" id="nav-men" role="tabpanel" aria-labelledby="nav-men-tab" tabindex="0">
+                <NavMenuCategory HomeMenuType="HomeMenuType.Men" IsMobile />
+            </div>
+
+            <div class="tab-pane fade" id="nav-women" role="tabpanel" aria-labelledby="nav-women-tab" tabindex="0">
+                <NavMenuCategory HomeMenuType="HomeMenuType.Women" IsMobile />
+            </div>
+            <div class="tab-pane fade" id="nav-sale" role="tabpanel" aria-labelledby="nav-sale-tab" tabindex="0">
+                <NavMenuCategory HomeMenuType="HomeMenuType.Sale" IsMobile />
+            </div>
+
+        </div>
+        <div class="bg-body-secondary py-3">
+            <div class="card py-2 px-4 shadow-sm rounded-0">
+                <a href="#" class="fs-5 text-decoration-none text-dark">
+                    <span class="">راهنما</span>
+                    <i class="fa-solid fa-arrow-left float-end"></i>
+                </a>
+            </div>
+            <div class="card py-2 px-4 shadow-sm rounded-0">
+                <a href="#" class="fs-5 text-decoration-none text-dark">
+                    <span class="">خبرنامه</span>
+                    <i class="fa-solid fa-arrow-left float-end"></i>
+                </a>
+            </div>
+            <div class="card py-2 px-4 shadow-sm mt-3 rounded-0">
+                <a href="#" class="fs-5 text-decoration-none text-dark">
+                    <span class="">خروج</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private string currentUrl = string.Empty;
+
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+
+    }
+
+
+
+
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    private bool CheckBasePage(string key)
+    {
+        return currentUrl.StartsWith(key, StringComparison.OrdinalIgnoreCase) || currentUrl.StartsWith("product/" + key, StringComparison.OrdinalIgnoreCase);
+    }
+
+}
+

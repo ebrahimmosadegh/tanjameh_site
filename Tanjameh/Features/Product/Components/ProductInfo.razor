@@ -1,0 +1,305 @@
+@using Tanjameh.Features.Currency.Services
+
+@rendermode InteractiveServer
+
+<div class="size-box position-relative dropdown">
+
+    <button id="btnSize" class="form-select form-select-lg rounded-0 border-dark text-start" type="button" @onclick="ToggleSizes">
+        @(SelectedVariant is null ? "انتخاب اندازه" : SelectedVariant.DisplaySize)
+    </button>
+
+    <div id="sizelist" class="size-content position-absolute box-shadow w-100 p-1 bg-white">
+        <nav class="cat-offcanvas">
+            <div class="nav nav-pills border-bottom" id="nav-tab" role="tablist">
+                <div class="vr"></div>
+                <button class="nav-link text-black-50 rounded-0" id="nav-size2-tab" type="button" role="tab" aria-controls="nav-men" aria-selected="true">سایز کارخانه</button>
+            </div>
+        </nav>
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="nav-size1-pane" role="tabpanel" aria-labelledby="nav-size1" tabindex="0">
+                <!-- list size -->
+                <div class="list-group list-group-flush list-size">
+                    @if (LoadingProductDetails)
+                    {
+                        <div class="spinner-border text-dark mx-auto my-3" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    }
+                    @foreach (var variant in ProductVariants)
+                    {
+                        <button type="button" class="list-group-item list-group-item-action" disabled="@(variant.IsAvailable == false)" @onclick="() => SelectVariant(variant.Id)">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1 @(variant.IsAvailable == true ? "available" : "text-muted")">
+                                    @variant.DisplaySizeText @(variant.SizeDescription != null ? " - " + variant.SizeDescription : "") @(variant.IsAvailable == false ? " - موجود نیست" : "")
+                                </h5>
+                                <small class="text-muted"></small>
+                            </div>
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- cart & wishlist -->
+<div class="d-flex">
+    <button id="addToCart" class="btn btn-lg btn-dark w-100 my-2 rounded-0 me-2" @onclick="AddToShopCart" disabled="@AddtoCartWaiting">
+        @if (AddtoCartWaiting)
+        {
+            <span class="spinner-border spinner-border-sm text-light mx-auto my-0" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </span>
+        }
+        else
+        {
+            <span>افزودن به سبد خرید</span>
+        }
+    </button>
+    <button id="btnWishlist" @onclick="ToggleWishList" value="@Info?.Id" type="button"
+            class="btn btn-outline-dark my-2 rounded-0 btn-heart fs-4 @(IsInWishList ? "active" : "")">
+        <i class="fa-regular fa-heart" aria-hidden="true"></i>
+    </button>
+</div>
+<!-- delivery -->
+<ul class="list-group list-group-flush border border-1 rounded-0 p-0 my-4">
+    <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+        <div class="ps-2 pe-auto">
+            <h6 class="mt-2">
+                فروش و ارسال توسط تن جامه
+            </h6>
+        </div>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+        <div class="ms-2 me-auto">
+            <div class="fw-bold"><i class="fa-solid fa-truck me-2"></i>تحویل استاندارد</div>
+            25 روز کاری
+        </div>
+        <span class="me-2 fw-bold">@ProductWeightPrice.GetPriceText()</span>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-start py-3">
+        <div class="ms-2 me-auto">
+            <div class="fw-bold">
+                <svg class="zds-icon RC794g X9n9TI DlJ4rT _5Yd-hZ RkQYXx pVrzNP H3jvU7 me-2" style="vertical-align: middle;" height="1.5em" width="1.5em" focusable="false" fill="currentColor" viewBox="0 0 24 24" aria-labelledby="box-transit-23640" role="img" aria-hidden="false">
+                    <title id="box-transit-23640">box-transit</title>
+                    <path d="m16.5 14.5-4.2-1.9c-.2-.1-.4-.1-.6 0l-4.2 1.9V6.9l2-5.6h5l2 5.9v7.3zM9 7.3v4.9l2.1-.9c.6-.3 1.2-.3 1.8 0l2.1.9V7.3l-1.6-4.5h-2.9L9 7.3z"></path>
+                    <path d="M20.5 22.8h-17c-1.2 0-2.2-1-2.2-2.2V19c0-.4.3-.8.8-.8s.8.3.8.8v1.5c0 .4.3.8.8.8h17c.4 0 .8-.3.8-.8V7.3c0-.1 0-.2-.1-.3l-1.5-3.8c-.1-.3-.4-.5-.7-.5H5c-.3 0-.6.2-.7.5L2.8 7c0 .1-.1.2-.1.3V10c0 .4-.3.8-.8.8s-.7-.4-.7-.8V7.3c0-.3.1-.6.2-.8l1.5-3.8c.4-.9 1.2-1.5 2.1-1.5h14c.9 0 1.7.6 2.1 1.4l1.5 3.8c.1.3.2.5.2.8v13.2c0 1.3-1.1 2.4-2.3 2.4z"></path>
+                    <path d="M2 7h20v1.5H2zM4.8 13.8h-4c-.5 0-.8-.4-.8-.8s.3-.8.8-.8h4c.4 0 .8.3.8.8s-.4.8-.8.8zM4.8 16.8h-4c-.5 0-.8-.4-.8-.8s.3-.8.8-.8h4c.4 0 .8.3.8.8-.1.4-.4.8-.8.8z"></path>
+                </svg>
+                وزن تقریبی: @(ProductWeightPrice.WeightSource?.Weight) KG
+            </div>
+        </div>
+    </li>
+</ul>
+<!-- accordion description -->
+<div class="accordion accordion-flush" id="accordionDescription">
+    @if (!string.IsNullOrWhiteSpace(_careInfo))
+    {
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingCare">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseCare" aria-expanded="false" aria-controls="flush-collapseCare">
+                    مراقبت
+                </button>
+            </h2>
+            <div id="flush-collapseCare" class="accordion-collapse collapse" aria-labelledby="flush-headingCare">
+                <div class="accordion-body">
+                    @((MarkupString)_careInfo)
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingDetails">
+            <button @onclick="() => UpdateProduct()" class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseDetails" aria-expanded="false" aria-controls="flush-collapseDetails">
+                جزئیات
+            </button>
+        </h2>
+        <div id="flush-collapseDetails" class="accordion-collapse collapse" aria-labelledby="flush-headingDetails">
+            <div class="accordion-body">
+                @if (LoadingProductDetails)
+                {
+                    <div class="d-flex justify-content-center my-3">
+                        <div class="spinner-border text-dark" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <ul class="list-unstyled">
+                        <li><strong>کد محصول:</strong> @Info.Id</li>
+                        <li>@((MarkupString)_productInfo)</li>
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="accordion-item">
+        <h2 class="accordion-header" id="flush-headingSizeFit">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseSizeFit" aria-expanded="true" aria-controls="flush-collapseSizeFit" @onclick="() => UpdateProduct()">
+                اندازه و تناسب
+            </button>
+        </h2>
+        <div id="flush-collapseSizeFit" class="accordion-collapse collapse show" aria-labelledby="flush-headingSizeFit">
+            <div class="accordion-body">
+                @if (LoadingProductDetails)
+                {
+                    <div class="d-flex justify-content-center my-3">
+                        <div class="spinner-border text-dark" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <ul class="list-unstyled">
+                        <li>@((MarkupString)_sizeAndFit)</li>
+                    </ul>
+                }
+                <!-- Button trigger modal -->
+                <button type="button" class="btn btn-dark rounded-0 mt-3" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">
+                    راهنمای اندازه
+                </button>
+
+                <!-- Size Guide Modal -->
+                <div class="modal fade" id="sizeGuideModal" tabindex="-1" aria-labelledby="sizeGuideModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content rounded-0">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="sizeGuideModalLabel">راهنمای اندازه</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body px-4">
+                                <p class="text-muted mb-4">
+                                    با راهنمای تبدیل مفید ما، اندازه خود را در کشورهای مختلف بیابید. بهتر است از این به عنوان یک قاعده کلی استفاده کنید، زیرا اندازه ها و تناسب می تواند از برندی به برند دیگر متفاوت باشد.
+                                </p>
+                                
+                                <h6 class="fw-semibold mt-4 mb-3">تبدیل اندازه</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered text-center">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>UK</th>
+                                                <th>INT</th>
+                                                <th>EU</th>
+                                                <th>FR</th>
+                                                <th>IT</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>4</td><td>XXS</td><td>32</td><td>34</td><td>38</td></tr>
+                                            <tr><td>6</td><td>XS</td><td>34</td><td>36</td><td>40</td></tr>
+                                            <tr><td>8</td><td>S</td><td>36</td><td>38</td><td>42</td></tr>
+                                            <tr><td>10</td><td>M</td><td>38</td><td>40</td><td>44</td></tr>
+                                            <tr><td>12</td><td>L</td><td>40</td><td>42</td><td>46</td></tr>
+                                            <tr><td>14</td><td>XL</td><td>42</td><td>44</td><td>48</td></tr>
+                                            <tr><td>16</td><td>XXL</td><td>44</td><td>46</td><td>50</td></tr>
+                                            <tr><td>18</td><td>3XL</td><td>46</td><td>48</td><td>52</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <h6 class="fw-semibold mt-5 mb-3">اندازه بدن (سانتی متر)</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered text-center">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>UK</th>
+                                                <th>INT</th>
+                                                <th>نیم تنه</th>
+                                                <th>کمر</th>
+                                                <th>باسن</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>4</td><td>XXS</td><td>76</td><td>63</td><td>85</td></tr>
+                                            <tr><td>6</td><td>XS</td><td>80</td><td>67</td><td>89</td></tr>
+                                            <tr><td>8</td><td>S</td><td>84</td><td>71</td><td>93</td></tr>
+                                            <tr><td>10</td><td>M</td><td>88</td><td>75</td><td>97</td></tr>
+                                            <tr><td>12</td><td>L</td><td>92</td><td>79</td><td>101</td></tr>
+                                            <tr><td>14</td><td>XL</td><td>96</td><td>83</td><td>105</td></tr>
+                                            <tr><td>16</td><td>XXL</td><td>100</td><td>87</td><td>109</td></tr>
+                                            <tr><td>18</td><td>3XL</td><td>104</td><td>91</td><td>113</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <h6 class="fw-semibold mt-5 mb-3">چگونه خود را اندازه گیری کنیم</h6>
+                                <dl>
+                                    <dt class="fw-semibold">نیم تنه</dt>
+                                    <dd class="mb-3 text-muted">نوار اندازه گیری را زیر بغل خود بیاورید و کامل ترین قسمت سینه خود را اندازه بگیرید.</dd>
+                                    
+                                    <dt class="fw-semibold">کمر</dt>
+                                    <dd class="mb-3 text-muted">نوار اندازه گیری را دور کمر طبیعی خود بیاورید و بین بالاترین قسمت استخوان لگن و دنده های پایینی خود اندازه بگیرید.</dd>
+                                    
+                                    <dt class="fw-semibold">باسن</dt>
+                                    <dd class="mb-3 text-muted">نوار اندازه گیری را دور باسن خود بیاورید و کامل ترین قسمت پایین بدن خود را اندازه بگیرید.</dd>
+                                </dl>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary rounded-0" data-bs-dismiss="modal">بستن</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(Info.BrandDescription))
+    {
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingBrand">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseBrand" aria-expanded="false" aria-controls="flush-collapseBrand">
+                    برند
+                </button>
+            </h2>
+            <div id="flush-collapseBrand" class="accordion-collapse collapse" aria-labelledby="flush-collapseBrand">
+                <div class="accordion-body">
+                    @((MarkupString)Info.BrandDescription)
+                </div>
+            </div>
+        </div>
+    }
+    <!-- follow -->
+    <div class="hstack border border-top border-start-0 border-end-0 p-3 my-4">
+        <div class="fw-bold"><a href="@Info.BrandUrl" class="text-decoration-none text-dark d-block product-brand">@Info.BrandName</a></div>
+        <div class="ms-auto">
+            <button class="btn border-1 rounded-0 btn-outline-dark m-auto d-flex align-items-center clike-follow notfollow"><i class="fa-solid fa-plus me-2"></i><span>دنبال کنید</span></button>
+        </div>
+    </div>
+    <!-- reviews -->
+</div>
+
+<!-- Add to Cart Modal -->
+<div class="modal fade" id="addToCartModal" tabindex="-1" @ref="AddtoCartModalElement" aria-labelledby="addToCartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-0">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addToCartModalLabel">موفقیت آمیز بود</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-3">
+                        @if (ShoppingCartItem?.ProductThumbnailUrl is not null)
+                        {
+                            <img src="@ShoppingCartItem.ProductThumbnailUrl" class="img-fluid" alt="Product Image">
+                        }
+                    </div>
+                    <div class="col-9">
+                        <p><strong>@ShoppingCartItem?.ProductName</strong></p>
+                        <p>اندازه: @SelectedVariant?.DisplaySize</p>
+                        <p>به سبد خرید شما اضافه شد.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark rounded-0" data-bs-dismiss="modal">ادامه خرید</button>
+                <button type="button" class="btn btn-dark rounded-0" @onclick="GoToCart">مشاهده سبد خرید</button>
+            </div>
+        </div>
+    </div>
+</div>
+

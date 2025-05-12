@@ -1,0 +1,39 @@
+﻿
+@page "/admin/product/fetch"
+
+@using Tanjameh.BackgroundServices
+
+
+<PageTitle>بروز رسانی محصولات های سایت</PageTitle>
+
+
+<RadzenStack>
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Info" Visible="@(!string.IsNullOrEmpty(Message))">@Message</RadzenAlert>
+</RadzenStack>
+
+<h3>ApiSystem</h3>
+<div class="mx-3 my-2">
+    <RadzenButton Icon="get_app" Text="بروز رسانی" Click="@FetchAction" Variant="Variant.Flat" />
+</div>
+
+<div class="rz-p-12 rz-text-align-center">
+    <RadzenFormField Text="Request Count" Style="width: 100%;">
+        <RadzenNumeric Min="1" Max="500" @bind-Value=@take />
+    </RadzenFormField>
+</div>
+
+<div class="rz-p-12 rz-text-align-center">
+    <RadzenFormField Text="Iterate Count" Style="width: 100%;">
+        <RadzenNumeric Min="1" Max="20" @bind-Value=@iterateCount />
+    </RadzenFormField>
+</div>
+
+<RadzenStack Gap="1rem" class="rz-m-12">
+    <RadzenProgressBar Value="@RequestCount.value" Max="@RequestCount.Total" Unit="@RequestCountUnit" />
+    <RadzenProgressBar ProgressBarStyle="ProgressBarStyle.Success" Value="@DownloadedImage.value" Max="@DownloadedImage.Total" Unit="@DownloadedImageUnit" />
+</RadzenStack>
+
+
+<div>
+    
+</div>

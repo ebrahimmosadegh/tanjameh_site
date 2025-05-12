@@ -1,0 +1,87 @@
+ @using Radzen
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <base href="/" />
+
+    <meta name="googlebot" content="noindex">
+
+    @* <link rel="stylesheet" href="bootstrap/bootstrap.min.css" /> *@
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="bootstrap/bootstrap.rtl.min.css" />
+    <link rel="stylesheet" href="owl/owl.carousel.min.css" />
+    <link rel="stylesheet" href="css/main.css?v=1" />
+
+
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/rtl_fixes.css" /> <!-- Added RTL fixes CSS -->
+    <link rel="stylesheet" href="Tanjameh.styles.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <HeadOutlet @rendermode="RenderModeForPage" />
+</head>
+
+<body>
+
+
+    <script src="/js/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="/owl/owl.carousel.min.js"></script>
+    <script src="/js/main.js?v=2.2"></script>
+    <script src="/js/product-zoom.js"></script> <!-- Existing zoom script -->
+    <script src="/js/js-image-zoom.js"></script> <!-- Added js-image-zoom library -->
+    <script src="/js/imageZoomInit.js"></script> <!-- Added image zoom initialization script -->
+
+    <Routes @rendermode="RenderModeForPage" />
+
+    <script src="_framework/blazor.web.js"></script>
+
+    <script src="_content/Radzen.Blazor/Radzen.Blazor.js?v=@(typeof(Radzen.Colors).Assembly.GetName().Version)"></script>
+
+    <!-- Stripe.js and Interop -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="/js/stripeInterop.js"></script>
+</body>
+
+</html>
+
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; }
+
+    [Inject]
+    private ThemeService ThemeService { get; set; }
+
+
+
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (HttpContext != null)
+        {
+            var theme = HttpContext.Request.Cookies["Tanjameh.AdminTheme"];
+
+            if (!string.IsNullOrEmpty(theme))
+            {
+                ThemeService.SetTheme(theme, false);
+            }
+        }
+    }
+
+    private IComponentRenderMode? RenderModeForPage =>
+     HttpContext.Request.Path.StartsWithSegments("/Admin")
+         ? InteractiveServer
+         : null;
+
+
+  
+}
+
+

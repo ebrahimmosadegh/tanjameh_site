@@ -1,0 +1,61 @@
+﻿@page "/admin/category/map-to-apis"
+
+
+<PageTitle>مپ دسته بندی</PageTitle>
+
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="مپ دسته بندی با api" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow>
+        <RadzenColumn SizeMD=12>
+            <RadzenDataGrid @ref="grid0" ColumnWidth="200px" AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+                            Data="@siteCategoryToApis" RowUpdate="@GridRowUpdate" RowCreate="@GridRowCreate" TItem="Core.Entities.SiteCategoryToApi">
+                <Columns>
+                    <RadzenDataGridColumn TItem="Core.Entities.SiteCategoryToApi" Property="SiteCategory.Name" Title="Category">
+                        <EditTemplate Context="siteCategoryToApi">
+                            <RadzenDropDown Data="@categoriesForSiteCategoryId" TextProperty="DisplayText" ValueProperty="Id" AllowClear=true
+                                            Placeholder="Choose Category" style="display: block; width: 100%" @bind-Value="@siteCategoryToApi.SiteCategoryId" Name="SiteCategoryId"
+                                            filterCaseSensitivity="@FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Core.Entities.SiteCategoryToApi" Property="ApiCategory.Name" Title="Category Api">
+                        <EditTemplate Context="siteCategoryToApi">
+                            <RadzenDropDown Data="@categoryApisForApiCategoryId" TextProperty="DisplayText" ValueProperty="Id" AllowClear=true
+                                            Placeholder="Choose CategoryApi" style="display: block; width: 100%" @bind-Value="@siteCategoryToApi.ApiCategoryId" Name="ApiCategoryId"
+                                            filterCaseSensitivity="@FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true" />
+                        </EditTemplate>
+                    </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Core.Entities.SiteCategoryToApi" Filterable="false" Sortable="false" Width="156px" TextAlign="TextAlign.Center">
+                        <EditTemplate Context="siteCategoryToApi">
+                            <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                                          style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                                          Click=@(args => SaveButtonClick(args, siteCategoryToApi)) @onclick:stopPropagation="true" />
+                            <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                                          Click=@(args => CancelButtonClick(args, siteCategoryToApi)) @onclick:stopPropagation="true" />
+                        </EditTemplate>
+                        <Template Context="siteCategoryToApi">
+
+                            <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                                          style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                                          Click=@(args => EditButtonClick(args, siteCategoryToApi)) @onclick:stopPropagation="true" />
+
+                            <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                                          Shade="Shade.Lighter" Variant="Variant.Flat"
+                                          Click=@(args => GridDeleteButtonClick(args, siteCategoryToApi)) @onclick:stopPropagation="true" />
+                        </Template>
+                    </RadzenDataGridColumn>
+                </Columns>
+
+            </RadzenDataGrid>
+
+        </RadzenColumn>
+    </RadzenRow>
+</RadzenStack>

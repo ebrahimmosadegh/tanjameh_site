@@ -1,0 +1,210 @@
+@rendermode InteractiveServer
+@page "/wish-list"
+
+@implements  IDisposable
+@using Tanjameh.Features.Favorite.Models
+@using Tanjameh.Features.Favorite.Services
+@inject IFavoriteService FavoriteService
+@inject NavigationManager NavigationManager
+
+<div class="favorite-main @(IsPopup ? "favorite-popup" : "container mt-4")">
+    <h2 class="header">لیست علاقه مندی ها</h2>
+    @if (favorite?.Items.Count > 0)
+    {
+        <table class="table">
+            <thead>
+            <tr>
+                <th>محصول</th>
+                <th> </th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in favorite.Items)
+            {
+                <tr>
+                    <td>
+                        <a href="@(item.ProductUrl??"#")"> <span class="product-name">@item.ProductName</span></a>
+                    </td>
+                    <td>
+                        <a href="@(item.ProductUrl??"#")"><img src="@item.ProductThumbnailUrl" alt="@item.ProductName" class="img-thumbnail"/></a>
+                    </td>
+
+                    <td>
+                        <button class="btn btn-remove btn-sm"
+                                @onclick="@(() => RemoveItem(item.ProductId, item.ProductVariantId))">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+
+        <div class="actions">
+
+        </div>
+    }
+    else
+    {
+        <p>لیست علافه مندی ها خالی است</p>
+    }
+</div>
+
+@code {
+    private FavoriteModel? favorite;
+    private bool isLoaded = false;
+
+    [Parameter] public bool IsPopup { get; set; }
+
+    [Parameter] public EventCallback OnClose { get; set; }
+    
+
+    protected override void OnInitialized()
+    {
+        FavoriteService.OnChange += CartChange;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadCart();
+            isLoaded = true;
+            StateHasChanged();
+        }
+    }
+
+    private async void CartChange()
+    {
+        await LoadCart();
+        StateHasChanged();
+    }
+
+
+    private async Task LoadCart()
+    {
+        favorite = await FavoriteService.GetFavoritesAsync(true);
+        
+    }
+
+
+
+
+    private async Task RemoveItem(int productId, int? productVariantId)
+    {
+        await FavoriteService.RemoveFromFavoritesAsync(productId, productVariantId);
+    }
+
+    private async Task ClearCart()
+    {
+        await FavoriteService.ClearFavoritesAsync();
+    }
+
+
+
+    public void Dispose()
+    {
+        FavoriteService.OnChange -= StateHasChanged;
+    }
+
+    //todo show product size in full favorite
+}
+
+<style>
+    .favorite-main img{
+        height: 7rem;
+        width: 5rem;
+        object-fit: cover;
+    }
+    .favorite-popup {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        background-color: white;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        z-index: 1000;
+        font-size: 14px;
+    }
+    
+
+    .favorite-popup h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .favorite-popup .table {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+
+    .favorite-popup .table th,
+    .favorite-popup .table td {
+        padding: 8px;
+        text-align: right;
+    }
+
+    .favorite-popup .table th {
+        font-weight: bold;
+        background-color: #f8f9fa;
+    }
+
+    .favorite-main input[type="number"] {
+        width: 60px !important;
+        text-align: center;
+    }
+
+    .favorite-main .btn {
+        padding: 6px 12px;
+        font-size: 14px;
+        margin-right: 5px;
+    }
+
+    .favorite-main .btn-danger {
+        padding: 2px 6px;
+        font-size: 12px;
+    }
+
+    .favorite-main .total {
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 15px;
+        text-align: left;
+    }
+
+    .favorite-popup .actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+
+    .favorite-popup .product-name {
+        max-width: 150px;
+        /* Adjust this value as needed */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: bottom;
+    }
+
+    .btn-remove {
+        color: #2c3034;
+        background-color: transparent;
+        border: none;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    .btn-remove:hover {
+        background-color: #d4d4d4;
+    }
+</style>

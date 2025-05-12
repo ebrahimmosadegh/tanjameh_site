@@ -1,0 +1,89 @@
+@using Tanjameh.Core.Dtos.Cart
+@using Tanjameh.Core.Interfaces
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject IShoppingCartService ShoppingCartService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<h4>Step 1: Review Your Cart</h4>
+
+@if (cartItems == null)
+{
+    <p><em>Loading cart...</em></p>
+}
+else if (!cartItems.Any())
+{
+    <p>Your cart is empty. <a href="/">Continue shopping</a></p>
+}
+else
+{
+    <ul class="list-group mb-3">
+        @foreach (var item in cartItems)
+        {
+            <li class="list-group-item d-flex justify-content-between lh-sm">
+                <div>
+                    <h6 class="my-0">@item.ProductName</h6>
+                    <small class="text-muted">@item.VariantName</small>
+                </div>
+                <span class="text-muted">@item.Price.ToString("C") x @item.Quantity</span>
+            </li>
+        }
+        <li class="list-group-item d-flex justify-content-between">
+            <span>Subtotal (USD)</span>
+            <strong>@subtotal.ToString("C")</strong>
+        </li>
+    </ul>
+
+    <button class="btn btn-primary" @onclick="ProceedToNextStep">Next: Address</button>
+}
+
+@code {
+    [Parameter] public EventCallback OnNext { get; set; }
+
+    private List<CartItemDto>? cartItems;
+    private decimal subtotal = 0;
+    private long userId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            var userIdClaim = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && long.TryParse(userIdClaim.Value, out userId))
+            {
+                await LoadCart();
+            }
+            else
+            {
+                NavigationManager.NavigateTo("/account/login");
+            }
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/account/login");
+        }
+    }
+
+    private async Task LoadCart()
+    {
+        cartItems = await ShoppingCartService.GetCartItemsAsync(userId);
+        CalculateSubtotal();
+        StateHasChanged();
+    }
+
+    private void CalculateSubtotal()
+    {
+        subtotal = cartItems?.Sum(item => item.Price * item.Quantity) ?? 0;
+    }
+
+    private async Task ProceedToNextStep()
+    {
+        // TODO: Optionally save cart state or validate before proceeding
+        await OnNext.InvokeAsync();
+    }
+}
+

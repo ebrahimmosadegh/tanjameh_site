@@ -1,0 +1,17 @@
+﻿<div class="container-md my-5">
+    <h4 class="h4 fw-semibold">
+        @Title
+    </h4>
+    <div class="row row-cols-md-4 row-cols-2 mt-4 lh-lg text-truncate b-animate b-dark">
+        @foreach (var item in NameUrls)
+        {
+            <div class="col">
+                <a class="nav-link" href="@item.Url">
+                    @item.Name
+                </a>
+            </div>
+        }
+
+    </div>
+</div>
+

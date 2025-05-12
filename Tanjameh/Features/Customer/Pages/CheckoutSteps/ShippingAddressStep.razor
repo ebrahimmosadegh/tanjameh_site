@@ -1,0 +1,30 @@
+@* Placeholder for Shipping Address Step *@
+@using Microsoft.AspNetCore.Components
+
+<h4>Step 2: Shipping Address</h4>
+
+<p>Select or add your shipping address.</p>
+
+@* TODO: Implement address selection/creation UI *@
+
+<div class="d-flex justify-content-between mt-4">
+    <button class="btn btn-secondary" @onclick="GoBack">Previous: Cart</button>
+    <button class="btn btn-primary" @onclick="ProceedToNextStep">Next: Shipping Method</button>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    private async Task ProceedToNextStep()
+    {
+        // TODO: Validate address selection
+        await OnNext.InvokeAsync();
+    }
+
+    private async Task GoBack()
+    {
+        await OnPrevious.InvokeAsync();
+    }
+}
+

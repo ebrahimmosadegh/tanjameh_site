@@ -1,0 +1,31 @@
+@* Placeholder for Payment Step *@
+@using Microsoft.AspNetCore.Components
+
+<h4>Step 4: Payment</h4>
+
+<p>Enter your payment details.</p>
+
+@* TODO: Implement payment form (e.g., Stripe Elements) and order summary *@
+
+<div class="d-flex justify-content-between mt-4">
+    <button class="btn btn-secondary" @onclick="GoBack">Previous: Shipping Method</button>
+    <button class="btn btn-success" @onclick="PlaceOrder">Place Order</button> @* Changed from Next to Place Order *@
+</div>
+
+@code {
+    [Parameter] public EventCallback OnPrevious { get; set; }
+    // No OnNext needed for the final step
+
+    private async Task PlaceOrder()
+    {
+        // TODO: Implement payment processing and order placement logic
+        Console.WriteLine("Placing order..."); // Placeholder
+        // Navigate to confirmation page on success
+    }
+
+    private async Task GoBack()
+    {
+        await OnPrevious.InvokeAsync();
+    }
+}
+

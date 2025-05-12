@@ -1,0 +1,165 @@
+﻿@using Radzen.Blazor
+@using Tanjameh.Features.Currency.Services
+@rendermode InteractiveServer
+
+<div class="div-filter">
+    <div class="dropdown d-inline-block mt-1 has-menu mx-1">
+        <button type="button" class="menu-toggle btn btn-outline-dark border-2 rounded-0 dropdown-toggle fw-bold lh-lg">
+            مرتب سازی
+        </button>
+        <div class="i-menu rounded-0">
+            <button @onclick="()=>OrderBy(Dtos.ProductsOrderBy.Default)" name="order" type="button" class="btn btn-outline-light text-dark rounded-0 w-100 py-3">
+                <span class="float-start">پیشنهادی</span>
+                @if (ProductsOrderBy == Dtos.ProductsOrderBy.Default)
+                {
+                    <i class="fa-solid fa-check float-end"></i>
+                }
+            </button>
+            <hr class="ms-3 m-0 border-dark-subtle">
+            <button @onclick="()=>OrderBy(Dtos.ProductsOrderBy.New)" name="order" type="button" class="btn btn-outline-light text-dark rounded-0 w-100 py-3">
+                <span class="float-start">جدیدترین</span>
+                @if (ProductsOrderBy == Dtos.ProductsOrderBy.New)
+                {
+                    <i class="fa-solid fa-check float-end"></i>
+                }
+            </button>
+            <hr class="ms-3 m-0 border-dark-subtle">
+            <button @onclick="()=>OrderBy(Dtos.ProductsOrderBy.PriceAscending)" name="order" type="button" class="btn btn-outline-light text-dark rounded-0 w-100 py-3">
+                <span class="float-start">پایین ترین قیمت</span>
+                @if (ProductsOrderBy == Dtos.ProductsOrderBy.PriceAscending)
+                {
+                    <i class="fa-solid fa-check float-end"></i>
+                }
+            </button>
+            <hr class="ms-3 m-0 border-dark-subtle">
+            <button @onclick="()=>OrderBy(Dtos.ProductsOrderBy.PriceDescending)" name="order" type="button" class="btn btn-outline-light text-dark rounded-0 w-100 py-3">
+                <span class="float-start">بالا ترین قیمت</span>
+                @if (ProductsOrderBy == Dtos.ProductsOrderBy.PriceDescending)
+                {
+                    <i class="fa-solid fa-check float-end"></i>
+                }
+            </button>
+            <hr class="ms-3 m-0 border-dark-subtle">
+            <button @onclick="()=>OrderBy(Dtos.ProductsOrderBy.Popular)" name="order" type="button" class="btn btn-outline-light text-dark rounded-0 w-100 py-3">
+                <span class="float-start">محبوب ترین</span>
+                @if (ProductsOrderBy == Dtos.ProductsOrderBy.Popular)
+                {
+                    <i class="fa-solid fa-check float-end"></i>
+                }
+            </button>
+            <hr class="ms-3 m-0 border-dark-subtle">
+            <button @onclick="()=>OrderBy(Dtos.ProductsOrderBy.Sale)" name="order" type="button" class="btn btn-outline-light text-dark rounded-0 w-100 py-3">
+                <span class="float-start">حراجی</span>
+                @if (ProductsOrderBy == Dtos.ProductsOrderBy.Sale)
+                {
+                    <i class="fa-solid fa-check float-end"></i>
+                }
+            </button>
+        </div>
+    </div>
+
+    <div class="dropdown d-inline-block mt-1 has-menu mx-1">
+        <button type="button" class="menu-toggle btn btn-outline-dark border-1 rounded-0 dropdown-toggle lh-lg" aria-expanded="false">
+            برند
+        </button>
+        <div class="i-menu p-0 rounded-0">
+            <div class="content-filter overflow-y-scroll overflow-x-hidden">
+                <ul class="list-unstyled pt-2 filter-sh">
+
+                    @foreach (var (brand, index) in AllFilterView.Brand.Select((brand, index) => (brand, index)))
+                    {
+                        if (brand.Count > 0)
+                        {
+                            <li class="border-bottom">
+                                <div class="filter-check">
+                                    <label class="form-check-label flex-grow-1 text-start" for="brandID@(index)">@brand.BrandName <span>(@brand.Count)</span></label>
+                                    <input class="form-check-input" type="checkbox" id="brandID@(index)" @bind="@brand.Selected">
+                                </div>
+                            </li>
+                        }
+                    }
+
+
+                </ul>
+            </div>
+            <div class="d-flex overflow-hidden border-top">
+                <button type="button" class="btn btn-secondary p-3 rounded-0 flex-grow-1" @onclick="Apply">
+                    اعمال
+                </button>
+                <button type="button" class="btn btn-light p-3 rounded-0 flex-grow-1" @onclick="ClearBrands">
+                    پاک
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="dropdown d-inline-block mt-1 has-menu mx-1">
+        <button type="button" class="menu-toggle btn btn-outline-dark border-1 rounded-0 dropdown-toggle lh-lg" aria-expanded="false">
+            رنگ
+        </button>
+        <div class="i-menu p-0 rounded-0">
+            <div class="content-filter overflow-y-scroll overflow-x-hidden">
+                <ul id="color_search_filter" class="list-unstyled pt-2 filter-sh">
+
+                    @foreach (var (color, index) in AllFilterView.Color.Select((color, index) => (color, index)))
+                    {
+                        if (color.Count > 0)
+                        {
+                            <li class="border-bottom">
+                                <div class="filter-check">
+                                    <span class="color" style="background:@(color.Color)"></span>
+                                    <label class="form-check-label flex-grow-1 text-start" for="colorID@(index)">@color.ColorName <span>(@color.Count)</span></label>
+                                    <input class="form-check-input" type="checkbox" id="colorID@(index)" @bind="@color.Selected">
+                                </div>
+                            </li>
+                        }
+                    }
+
+
+                </ul>
+            </div>
+            <div class="d-flex overflow-hidden border-top">
+                <button type="button" class="btn btn-secondary p-3 rounded-0 flex-grow-1" @onclick="Apply">
+                    اعمال
+                </button>
+                <button type="button" class="btn btn-light p-3 rounded-0 flex-grow-1" @onclick="ClearColors">
+                    پاک
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dropdown d-inline-block mt-1 has-menu mx-1 mt-2">
+        <button type="button" class="menu-toggle btn btn-outline-dark border-1 rounded-0 dropdown-toggle lh-lg" aria-expanded="false">
+            قیمت
+        </button>
+        <div class="i-menu p-0 rounded-0">
+
+            <div class="content-filter overflow-y-scroll overflow-x-hidden" style="width:300px">
+                @if (AllFilterView.Price.MinPrice > 0 && AllFilterView.Price.MaxPrice > 0 && AllFilterView.Price.MaxPrice != AllFilterView.Price.MinPrice)
+                {
+                    <div dir="ltr">
+                        <div class="m-3">
+                            <RadzenSlider @bind-Value=@SelectedPriceRange Range="true" TValue="IEnumerable<decimal>" Min="@AllFilterView.Price.MinPrice" Max="@AllFilterView.Price.MaxPrice" style="width:250px" />
+                        </div>
+                        <div class="d-flex justify-content-between mt-2 px-3">
+                            <span class="text-muted">@CurrencyService.ExchangeAndFormatting(SelectedPriceRange.First(), AllFilterView.Price.CurrencyId, 1)</span>
+                            <span class="text-muted">@CurrencyService.ExchangeAndFormatting(SelectedPriceRange.Last(), AllFilterView.Price.CurrencyId, 1)</span>
+                        </div>
+                    </div>
+                }
+   
+            </div>
+            <div class="d-flex overflow-hidden border-top">
+                <button type="button" class="btn btn-secondary p-3 rounded-0 flex-grow-1" @onclick="Apply">
+                    اعمال
+                </button>
+                <button type="button" class="btn btn-light p-3 rounded-0 flex-grow-1" @onclick="ClearPrice">
+                    پاک
+                </button>
+            </div>
+        </div>
+    </div>
+
+</div>

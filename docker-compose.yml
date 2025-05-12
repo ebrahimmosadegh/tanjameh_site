@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    environment:
+      MARIADB_ROOT_PASSWORD: AuzmjU6Q
+      MARIADB_DATABASE: tanjameh_store_asp
+      MARIADB_USER: tanjameh
+      MARIADB_PASSWORD: 5tgb^YHN
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: mariadb
+      PMA_PORT: 3306
+    ports:
+      - "8080:80"
+    depends_on:
+      - mariadb
+    networks:
+      - app_network
+
+  blazor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:8080"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    networks:
+      - app_network
+    volumes:
+      - blazor_wwwroot:/app/wwwroot
+      - blazor_logs:/app/logs
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  blazor_wwwroot:
+  blazor_logs: 

@@ -1,0 +1,84 @@
+@inherits LayoutComponentBase
+@layout MainLayout
+
+
+<div class="container my-5">
+
+    <div class="row">
+        <div class="col-md-4 i-list">
+            <div class="mb-4">
+                <p class="section-title">حساب شما</p>
+                <a href="/profile" class="text-decoration-none d-block">نگاه کلی</a>
+                <a href="#" class="text-decoration-none d-block">سفارش‌ها</a>
+                <a href="#" class="text-decoration-none d-block">بازگشت یک کالا</a>
+                <a href="#" class="text-decoration-none d-block">مرجوعات</a>
+                <a href="#" class="text-decoration-none d-block">جزئیات شخصی</a>
+                <a href="/profile/addresses" class="text-decoration-none d-block">آدرس‌ها</a>
+                <a href="#" class="text-decoration-none d-block">کارت‌های هدیه</a>
+                <a href="#" class="text-decoration-none d-block">خبرنامه‌ها</a>
+            </div>
+
+            <div class="mb-4">
+                <p class="section-title">کالاهای شما</p>
+                <a href="#" class="text-decoration-none d-block">مد</a>
+            </div>
+
+            <div class="mb-4">
+                <p class="section-title">شخصی‌سازی</p>
+                <a href="#" class="text-decoration-none text-dark d-block">برندهای شما</a>
+                <a href="#" class="text-decoration-none d-block">سازندگان شما</a>
+            </div>
+
+            <div class="mb-4">
+                <p class="section-title">بیشتر</p>
+                <a href="/ContactUs" class="text-decoration-none d-block">کمک و تماس</a>
+            </div>
+
+            <div class="mb-4">
+                <p class="section-title">اطلاعات و حریم خصوصی</p>
+                <a href="#" class="text-decoration-none d-block">ترجیحات توصیه</a>
+                <a href="#" class="text-decoration-none d-block">درخواست یا حذف داده‌ها</a>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+
+            @Body
+
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .section-title {
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .content img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .btn-custom {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .btn-custom:hover {
+        background-color: #333;
+        color: #fff;
+    }
+
+    .i-list a {
+        color: #2c3034;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+        ;
+    }
+
+    .i-list a:hover {
+        text-decoration: underline  !important;
+    }
+</style>

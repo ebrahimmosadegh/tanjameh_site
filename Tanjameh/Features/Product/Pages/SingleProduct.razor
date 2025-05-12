@@ -1,0 +1,148 @@
+@page "/product/men/{ProductSlug}/{ProductId:int}"
+@page "/product/women/{ProductSlug}/{ProductId:int}"
+
+@using MediatR
+@using Tanjameh.Dtos
+@using Tanjameh.Features.Currency.Services // Keep for potential formatting helpers
+@using Tanjameh.Features.Product.Components
+@using Tanjameh.Features.Product.Queries
+@using Tanjameh.Core.Constants;
+@using Microsoft.JSInterop
+@using Tanjameh.Core.Interfaces // Added for PriceCalculationResult
+@using Tanjameh.Api.Models.Products // Added for DTOs with LocalPriceInfo
+
+<PageTitle>تن جامه - @ProductName</PageTitle>
+
+@if (Product != null)
+{
+    <div class="container-md">
+        <div class="row mt-4 product">
+            <!-- zoom product -->
+            <div class="col-12 col-md-6">
+                <div class="sticky-md-top">
+                    <div class="position-relative z-1020">
+                        <span class="position-absolute top-0 end-0 bg-white p-1 m-2 font-x-s">
+                            @* Sale logic might need update based on LocalPriceInfo or specific Sale flags *@
+                            @* @if (Product.InSale || Product.OldPrice > Product.Price) *@
+                            @if (Product.Variants?.Any(v => v.LocalPriceInfo?.OriginalPriceBaseCurrency > 0 && v.LocalPriceInfo?.FinalPriceLocalCurrency < (v.LocalPriceInfo?.OriginalPriceBaseCurrency * v.LocalPriceInfo?.ConversionRateUsed * (1 + v.LocalPriceInfo?.AppliedMarginPercentage))) ?? false)
+                            {
+                                <span>Sale</span>
+                            }
+                        </span>
+                    </div>
+                    <div>
+                        @if (Product.ImageUrls != null && Product.ImageUrls.Count > 0 && Product.ImageUrls[0] != null)
+                        {
+                            <div id="img-container" style="width: 100%; max-width: 500px;">
+                                <img src="@Product.ImageUrls[0]" alt="@Product.Name" />
+                            </div>
+                        }
+                        else
+                        {
+                            <p>Image not available.</p>
+                        }
+                        @* Thumbnails can be added here if needed *@
+                    </div>
+                </div>
+            </div>
+            <!-- details product -->
+            <div class="col-12 col-md-5 offset-md-1 mt-4 mt-md-0">
+                <div class="item-detail-product">
+                    <div class="b-animate b-dark">
+                        <h3 class="mb-1">
+                            @* Brand link needs update if BrandUrl is not on DTO *@
+                            @* <a href="/@Product.BrandUrl" class="text-decoration-none text-dark d-block product-brand">@Product.BrandName</a> *@
+                            <span class="text-dark d-block product-brand">@Product.BrandName</span>
+                        </h3>
+                        <h2>@Product.Name</h2>
+                        @* Product Type link needs update if ProductType info is not on DTO *
+                        @* @if (Product.ProductType != null)
+                        {
+                            <h3 class="fw-semibold product-title">
+                                <a href="/@($"{Product.ProductType.Url}?gender={Product.GenderType.ToString()}")" class="text-decoration-none text-dark d-block">
+                                    @ProductTypeTranslate.GetTranslate(Product.ProductType.Name ?? "")
+                                </a>
+                            </h3>
+                        } *@
+                        
+                        @* --- Price Display --- *
+                        @* Display price from the first available variant or a primary one *
+                        @{ 
+                            var displayVariant = Product.Variants?.FirstOrDefault(v => v.IsAvailable); 
+                            if (displayVariant?.LocalPriceInfo != null)
+                            {
+                                <h4 class="d-block me-2 my-4 prices">
+                                    <span class="product-price">@DisplayPrice(displayVariant.LocalPriceInfo.FinalPriceLocalCurrency, displayVariant.LocalPriceInfo.LocalCurrency)</span>
+                                    @* Optional: Show original price *
+                                    <small class="text-muted ms-2">(@DisplayPrice(displayVariant.LocalPriceInfo.OriginalPriceBaseCurrency, displayVariant.LocalPriceInfo.BaseCurrency))</small>
+                                </h4>
+                                @* TODO: Add logic for Old Price / Strike-through price based on LocalPriceInfo or separate SalePrice field *
+                            }
+                            else if (displayVariant != null) // Price couldn't be calculated, show original?
+                            {
+                                 <h4 class="d-block me-2 my-4 prices">
+                                    <span class="product-price text-muted">@DisplayPrice(displayVariant.OriginalPrice, "GBP") (Price unavailable in local currency)</span>
+                                </h4>
+                            }
+                            else
+                            {
+                                <h4 class="d-block me-2 my-4 prices">
+                                    <span class="product-price text-muted">Price unavailable</span>
+                                </h4>
+                            }
+                        }
+                        @* --- End Price Display --- *@
+                    </div>
+                    <!-- rate -->
+                    @* @if (Product.Rating.HasValue) ... *@
+
+                    @* Pass Product Detail DTO to ProductInfo component *@
+                    <ProductInfo ProductDetail="Product" OnVariantSelected="HandleVariantSelected" />
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    // Assuming the code-behind (.razor.cs) handles fetching Product (ProductDetailDto)
+    // and calculating LocalPriceInfo for variants.
+    
+    // Method to handle variant selection from ProductInfo component (if needed)
+    private void HandleVariantSelected(ProductVariantDto selectedVariant)
+    {
+        // Update displayed price based on the selected variant if ProductInfo doesn't handle it directly
+        // This might involve updating a local variable bound to the price display section
+        Console.WriteLine($"Variant selected: {selectedVariant.Name}");
+        // Force UI update if necessary
+        StateHasChanged(); 
+    }
+
+    // Helper method to display price (copied from .razor.cs for clarity, should be in one place)
+    private string DisplayPrice(decimal price, string currencyCode)
+    {
+        if (string.IsNullOrEmpty(currencyCode)) return price.ToString("N2");
+        
+        try
+        {
+            // Specific formatting for Toman (IRR)
+            if (currencyCode.Equals("IRR", StringComparison.OrdinalIgnoreCase))
+            {
+                // Assuming the value is already calculated in Toman (1/10th of Rial)
+                // Round to nearest 100 or 1000 Toman if desired
+                // decimal roundedToman = Math.Round(price / 1000) * 1000;
+                // return $"{roundedToman:N0} تومان"; 
+                return $"{price:N0} تومان"; // Simple Toman format
+            }
+            // Standard currency format for others
+            return price.ToString("C", System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag(currencyCode)); // Use IETF tag if available
+        }
+        catch (System.Globalization.CultureNotFoundException)
+        { 
+            // Fallback if culture/currency code is not recognized
+            return $"{price:N2} {currencyCode}";
+        }
+    }
+}
+

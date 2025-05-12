@@ -1,0 +1,72 @@
+@page "/order-confirmation/{OrderId:long}"
+@attribute [Authorize]
+
+@using Tanjameh.Core.Entities
+@using Tanjameh.Core.Interfaces
+
+@inject IOrderService OrderService
+
+<h3>Order Confirmation</h3>
+
+@if (order == null)
+{
+    @if (isLoading)
+    {
+        <p><em>Loading order details...</em></p>
+    }
+    else
+    {
+        <p class="text-danger">Order not found or you do not have permission to view it.</p>
+    }
+}
+else
+{
+    <p>Thank you for your order!</p>
+    <p>Your order number is: <strong>@order.Id</strong></p>
+    <p>Order Date: @order.OrderDate.ToLocalTime()</p>
+    <p>Status: @order.Status</p>
+    <p>Total Amount: @order.TotalAmount.ToString("C")</p>
+
+    <h4>Items Ordered:</h4>
+    <ul>
+        @foreach (var item in order.OrderItems)
+        {
+            <li>@item.Quantity x Product ID: @item.ProductId (Price: @item.PriceAtTimeOfOrder.ToString("C"))</li>
+            @* TODO: Display product name/details instead of just ID by fetching product info *@
+        }
+    </ul>
+
+    @* TODO: Display Shipping Address details by fetching Address info using order.ShippingAddressId *@
+    <p>Shipping Address ID: @order.ShippingAddressId</p>
+
+    <p><a href="/customer/orders">View your order history</a></p>
+}
+
+@code {
+    [Parameter]
+    public long OrderId { get; set; }
+
+    private Order? order;
+    private bool isLoading = true;
+
+    // TODO: Get current user ID to verify ownership of the order
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        try
+        {
+            // TODO: Add check to ensure the current user owns this order
+            order = await OrderService.GetOrderByIdAsync(OrderId);
+        }
+        catch (Exception ex)
+        {
+            // Log error
+            Console.WriteLine($"Error loading order confirmation: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

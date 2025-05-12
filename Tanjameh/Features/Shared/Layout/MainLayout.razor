@@ -1,0 +1,65 @@
+﻿@using Blazored.Toast
+@using Blazored.Toast.Configuration
+
+@inherits LayoutComponentBase
+
+
+<BlazoredToasts @rendermode="InteractiveServer"
+                Position="ToastPosition.TopCenter"
+                Timeout="5"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"/>
+<div>
+    <!-- scroll back to top -->
+    <a id="back-to-top" href="#" class="btn btn-dark btn-sm rounded-0 back-to-top" role="button"><i class="fa-solid fa-chevron-up"></i><span class="d-none d-md-block"> برو بالا</span></a>
+
+    @if (false)
+    {
+        <!-- alert top web view -->
+        <div class="alert fade show rounded-0 position-absolute top-0 w-100 p-0 bg-orange d-none d-md-block" role="alert">
+            <div class="container text-center text-truncate">
+                <a href="#" class="text-decoration-none text-white font-x-s">
+                    تا 50% تخفیف! در فروش زمستانی ما، بیشتر کاوش کنید...
+                </a>
+                <button type="button" class="btn-close btn-close-white p-0 float-end mt-1" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <!-- alert top mobile view -->
+        <div class="alert fade show rounded-0 top-0 w-100 p-0 bg-orange d-md-none" role="alert">
+            <div class="container text-center text-truncate">
+                <a href="#" class="text-decoration-none text-white font-x-s">
+                    تا 50% تخفیف! در فروش زمستانی ما، سبک های مورد علاقه خود را بیشتر کاوش کنید...
+                </a>
+                <button type="button" class="btn-close btn-close-white p-0 float-end mt-1" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+    }
+
+    <NavMenu />
+
+    <main class="tanjameh">
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+
+    <MainFooter />
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+
+    <Tanjameh.Features.Advers.Components.CarouselHelper/>
+
+</div>
+
+
+@code{
+
+   
+}

@@ -1,0 +1,19 @@
+﻿@page "/sale"
+@using Tanjameh.Features.Advers.Components
+@using Tanjameh.Features.BrandAndType.Components
+@using Tanjameh.Features.BrandAndType.Models
+
+
+<PageTitle>تن جامه - حراج</PageTitle>
+
+
+@foreach (var item in Banners)
+{
+    <section>
+        <AdverBannerType1 BannerData="item" />
+    </section>
+}
+
+
+
+

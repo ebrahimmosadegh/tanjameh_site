@@ -1,0 +1,51 @@
+﻿<div class="col card rounded-0 border-0">
+    <div class="position-relative d-inline-block product">
+        <div class="position-absolute top-0 z-1 mt-2">
+            <!-- add class like or dislike -->
+            <button type="button" @onclick="ToggleWishList"
+                    class="btn btn-light rounded-0 btn-heart dislike lh-1 p-2 fs-5 @(IsInWishList?"active":"")">
+                <i class="fa-regular fa-heart" aria-hidden="true">
+                    
+                </i>
+            </button>
+        </div>
+        <a href="@ProductPreview.Url" class="text-decoration-none">
+            <div class="card text-dark rounded-0 border-0 bg-transparent">
+                <div class="position-relative placeholder-glow">
+                    <div class="product-img position-relative pt-144 bg-dark-subtle w-100">
+                        <img class="card-img rounded-0 position-absolute top-0 lazy-image loaded fit-image" data-src="@ProductPreview.ThumbnailImageUrl"
+                        onmouseover="this.src='@(ProductPreview.ThumbnailImageUrls?.Length > 1 ? ProductPreview.ThumbnailImageUrls[1] : ProductPreview.ThumbnailImageUrl)';"
+                         onmouseout="this.src='@(ProductPreview.ThumbnailImageUrls?.Length > 1 ? ProductPreview.ThumbnailImageUrls[0] : ProductPreview.ThumbnailImageUrl)';"
+                        alt="" src="@ProductPreview.ThumbnailImageUrl">
+                    </div>
+                    @if (ProductPreview.HasOldPrice)
+                    {
+                        <div class="position-absolute bottom-0 end-0 hstack gap-1">
+                            <div class="text-bg-danger p-1 mb-2"><small>تخفیف</small></div>
+                        </div>
+                    }
+                </div>
+                <div class="card-body p-0 py-2">
+                    <h6 class="m-0 text-truncate">
+                        @ProductPreview.Name
+                    </h6>
+                    <h6 class="m-0 text-truncate product-detail">
+                        @ProductPreview.CategoryName @(string.IsNullOrEmpty(ProductPreview.ProductTypeName) ? "" : $" - {ProductPreview.ProductTypeName}")
+                    </h6>
+                </div>
+                <section>
+                    <h6 class="fw-semibold text-danger">
+                        <span class="product-price">
+                            <h6 class="fw-semibold">@ProductPreview.GetPriceText()</h6>
+                        </span>
+                    </h6>
+                    @if (ProductPreview.HasOldPrice)
+                    {
+                        <h6><del>@ProductPreview.GetOldPriceText()</del></h6>
+                    }
+                </section>
+            </div>
+        </a>
+    </div>
+</div>
+

@@ -1,0 +1,15 @@
+﻿@page "/"
+@using Tanjameh.Features.Advers.Components
+@* @using Tanjameh.Features.Advers.Componants *@
+
+<PageTitle>تن جامه</PageTitle>
+
+
+@foreach (var item in Banners)
+{
+    <section>
+        <AdverBannerType1 BannerData="item" />
+    </section>
+}
+
+

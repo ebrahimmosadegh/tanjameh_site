@@ -1,0 +1,125 @@
+@page "/profile/addresses"
+
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+@using Tanjameh.Features.Customer.Layouts
+@layout ProfileLayout
+
+<div class="container mt-4">
+    <h2 class="mb-4">آدرس های من</h2>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <button class="btn btn-primary mb-3" @onclick="() => ShowAddressModal()">افزودن آدرس جدید</button>
+            @if (addresses != null && addresses.Any())
+            {
+                @foreach (var address in addresses)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="card-title">@address.City</h5>
+                                @if (address.IsDefault)
+                                {
+                                    <span class="badge bg-primary">پیش‌فرض</span>
+                                }
+                            </div>
+                            <p class="card-text">@address.Address</p>
+                            <p class="card-text">کد پستی: @address.ZipCode</p>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary" @onclick="() => ShowEditModal(address)">ویرایش</button>
+                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ShowDeleteConfirm(address.Id)">حذف</button>
+                                @if (!address.IsDefault)
+                                {
+                                    <button class="btn btn-sm btn-outline-success" @onclick="() => SetDefaultAddress(address.Id)">تنظیم به عنوان پیش‌فرض</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="alert alert-info">هیچ آدرسی ثبت نشده است.</div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Address Modal -->
+<div class="modal fade @(showAddressModal ? "show" : "")" style="display: @(showAddressModal ? "block" : "none")" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">@(editingAddress?.Id > 0 ? "ویرایش آدرس" : "افزودن آدرس جدید")</h5>
+                <button type="button" class="btn-close" @onclick="CloseModal"></button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@currentAddress" OnValidSubmit="HandleSubmit" FormName="register-address-form">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+
+                    <div class="mb-3">
+                        <label class="form-label">آدرس</label>
+                        <InputTextArea class="form-control" @bind-Value="currentAddress.Address" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">شهر</label>
+                        <InputText class="form-control" @bind-Value="currentAddress.City" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">کشور</label>
+                        <InputText class="form-control" @bind-Value="currentAddress.Country" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">کد پستی</label>
+                        <InputText class="form-control" @bind-Value="currentAddress.ZipCode" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">آدرس لاتین</label>
+                        <InputTextArea class="form-control" @bind-Value="currentAddress.LatinAddress" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">شهر لاتین</label>
+                        <InputText class="form-control" @bind-Value="currentAddress.LatinCity" />
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">@(editingAddress?.Id > 0 ? "بروزرسانی" : "ثبت آدرس")</button>
+                        <button type="button" class="btn btn-secondary" @onclick="CloseModal">انصراف</button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade @(showDeleteModal ? "show" : "")" style="display: @(showDeleteModal ? "block" : "none")" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">تایید حذف</h5>
+                <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+            </div>
+            <div class="modal-body">
+                <p>آیا از حذف این آدرس اطمینان دارید؟</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" @onclick="ConfirmDelete">بله، حذف شود</button>
+                <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal">انصراف</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (showAddressModal || showDeleteModal)
+{
+    <div class="modal-backdrop fade show"></div>
+}

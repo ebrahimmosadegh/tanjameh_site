@@ -1,0 +1,56 @@
+﻿@using Tanjameh.Features.ShoppingCart.Services
+@rendermode InteractiveServer
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+
+
+<span></span>
+
+@code {
+    private bool LocationChanged = false;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        LocationChanged = true;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await InitializeJsTool();
+    }
+
+    private async Task InitializeJsTool()
+    {
+        if (!LocationChanged)
+            return;
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("scrollTop");
+            await Task.Delay(200);
+            await JSRuntime.InvokeVoidAsync("initializeMenu");
+            await JSRuntime.InvokeVoidAsync("initializeLazyImage");
+            await JSRuntime.InvokeVoidAsync("initializeOwlCarousel");
+    
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        LocationChanged = false;
+
+    }
+}

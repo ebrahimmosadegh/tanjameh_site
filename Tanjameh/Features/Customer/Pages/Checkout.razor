@@ -1,0 +1,72 @@
+@page "/checkout"
+@attribute [Authorize]
+
+@using Tanjameh.Features.Customer.Pages.CheckoutSteps
+
+@inject NavigationManager NavigationManager
+
+<div class="container mt-4">
+    <h3>Checkout</h3>
+
+    <div class="checkout-steps mb-4">
+        <span class="step @(currentStep == 1 ? "active" : "")">1. Cart</span>
+        <span class="step-separator">></span>
+        <span class="step @(currentStep == 2 ? "active" : "")">2. Address</span>
+        <span class="step-separator">></span>
+        <span class="step @(currentStep == 3 ? "active" : "")">3. Shipping</span>
+        <span class="step-separator">></span>
+        <span class="step @(currentStep == 4 ? "active" : "")">4. Payment</span>
+    </div>
+
+    @* Render the current step component *@
+    @switch (currentStep)
+    {
+        case 1:
+            <CartReviewStep OnNext="GoToNextStep" />
+            break;
+        case 2:
+            @* <ShippingAddressStep OnNext="GoToNextStep" OnPrevious="GoToPreviousStep" /> *@
+            <p>Step 2: Shipping Address (Component not yet created)</p>
+            <button @onclick="GoToNextStep">Next (Placeholder)</button>
+             <button @onclick="GoToPreviousStep">Previous</button>
+            break;
+        case 3:
+            @* <ShippingMethodStep OnNext="GoToNextStep" OnPrevious="GoToPreviousStep" /> *@
+            <p>Step 3: Shipping Method (Component not yet created)</p>
+            <button @onclick="GoToNextStep">Next (Placeholder)</button>
+             <button @onclick="GoToPreviousStep">Previous</button>
+            break;
+        case 4:
+            @* <PaymentStep OnPrevious="GoToPreviousStep" /> *@
+            <p>Step 4: Payment (Component not yet created)</p>
+             <button @onclick="GoToPreviousStep">Previous</button>
+            break;
+        default:
+            <p>Invalid step.</p>
+            break;
+    }
+
+</div>
+
+@code {
+    private int currentStep = 1;
+
+    private void GoToNextStep()
+    {
+        if (currentStep < 4)
+        {
+            currentStep++;
+            StateHasChanged();
+        }
+    }
+
+    private void GoToPreviousStep()
+    {
+        if (currentStep > 1)
+        {
+            currentStep--;
+            StateHasChanged();
+        }
+    }
+}
+

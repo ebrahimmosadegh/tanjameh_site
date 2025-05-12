@@ -1,0 +1,217 @@
+﻿@page "/admin/media"
+@using Microsoft.AspNetCore.Components.Web
+@using Tanjameh.Core.Enums
+@using Tanjameh.Features.Admin.Media.Model
+@using Radzen
+
+<PageTitle>مدیریت مدیا</PageTitle>
+
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenText Text="مدیریت مدیا" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="4">
+            <RadzenRow class="mb-3">
+                <RadzenColumn Size="8">
+                    <RadzenFormField Text="عنوان محصول" Style="width: 100%;">
+                        <RadzenTextBox @bind-Value="@filterProductyName" />
+                    </RadzenFormField>
+                </RadzenColumn>
+                <RadzenColumn Size="4">
+                    <RadzenButton Click="ReloadFilter" Text="Search" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" class="mt-2" />
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow class="mb-3">
+                <RadzenSelectBar TValue="ProductPublishMode" Size="ButtonSize.Small" @bind-Value="productPublishMode" Change="()=>ReloadFilter()">
+                    <Items>
+                        <RadzenSelectBarItem Value="ProductPublishMode.UnPulished" Text="منتشر نشده" />
+                        <RadzenSelectBarItem Value="ProductPublishMode.Published" Text="منتشر شده" />
+                        <RadzenSelectBarItem Value="ProductPublishMode.Rejected" Text="رد شده" />
+                        <RadzenSelectBarItem Value="ProductPublishMode.All" Text="همه" />
+                    </Items>
+                </RadzenSelectBar>
+            </RadzenRow>
+
+            <RadzenRow class="mb-3">
+                <RadzenSelectBar TValue="ProductWeightMode" Size="ButtonSize.Small" @bind-Value="productWeightMode" Change="()=>ReloadFilter()">
+                    <Items>
+                        <RadzenSelectBarItem Value="ProductWeightMode.HasWeight" Text="وزن دار" />
+                        <RadzenSelectBarItem Value="ProductWeightMode.NoWeight" Text="وزن نگرفته" />
+                        <RadzenSelectBarItem Value="ProductWeightMode.All" Text="همه" />
+                    </Items>
+                </RadzenSelectBar>
+            </RadzenRow>
+            
+            <RadzenRow class="mb-3">
+                <RadzenDropDown Data="@catalogBrands" TextProperty="Title" ValueProperty="Id" AllowClear=true
+                                Placeholder="برند" style="display: block; width: 100%" @bind-Value="@brandFilterId" Change="()=>ReloadFilter()"
+                                filterCaseSensitivity="@FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true" />
+            </RadzenRow>
+            <RadzenRow class="mb-3">
+                <RadzenDropDown Data="@productTypes" TextProperty="Title" ValueProperty="Id" AllowClear=true
+                                Placeholder="نوع محصول" style="display: block; width: 100%" @bind-Value="@typeFilterId" Change="()=>ReloadFilter()"
+                                filterCaseSensitivity="@FilterCaseSensitivity.CaseInsensitive" FilterOperator="StringFilterOperator.StartsWith" AllowFiltering="true" />
+            </RadzenRow>
+
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="4">
+            @*Make it Component *@
+            <RadzenCard>
+                <RadzenText TextStyle="TextStyle.Subtitle2" TagName="TagName.H3" class="rz-mb-0">دسته بندی</RadzenText>
+                @* <RadzenText TextStyle="TextStyle.Body2" class="rz-mb-2">Data from a single self-referencing table.</RadzenText> *@
+                <RadzenTree @bind-Value=filterCategory Change="()=>ReloadFilter()" Style="height: 300px">
+                    <RadzenTreeItem Text="همه" Value="null">
+                    </RadzenTreeItem>
+                </RadzenTree>
+                <RadzenTree Data=@productCategories @bind-Value=filterCategory Change="()=>ReloadFilter()" Style="height: 300px">
+                    <RadzenTreeLevel TextProperty="Name" ChildrenProperty="SubCategories"
+                                     HasChildren=@(e => (e as Core.Entities.Category)!.SubCategories.Any()) Expanded=@(e => (e as Core.Entities.Category)!.Id == default) />
+                </RadzenTree>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow>
+        <RadzenColumn Size="12">
+
+            <div class="rz-g">
+                <div style="max-width:200px" @onclick="SelectAll">
+                </div>
+                @for (int i = 0; i < 5; i++)
+                {
+                    int colNumber = i;
+                    <div @onclick="()=> ColMultiSelect(colNumber)"> :: </div>
+                }
+            </div>
+
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow>
+        <RadzenDataList WrapItems AllowPaging @ref="list"
+                        Data="@productMediaFiles" TItem="ProductMediaDto"
+                        PageSize="10" PagerHorizontalAlign="HorizontalAlign.Left" Page="Page"
+                        ShowPagingSummary="true" PageSizeOptions="[10,15,20]" LoadData="LoadData" Count="@count">
+            <Template Context="mediaFileGroup">
+                @{
+                    var selectedProduct = selectedProductMedias?.FirstOrDefault(x => x.ProductId == mediaFileGroup.ProductId);
+                    var firstMedia = mediaFileGroup.MediaFiles.FirstOrDefault();
+                }
+
+                <RadzenRow style="max-width:200px" dir="ltr" @onclick="()=>selectedProduct.Selected = !selectedProduct.Selected">
+                    <RadzenColumn Size="12" class="rz-text-truncate">
+                        <b>@(mediaFileGroup.ProductId)</b>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" class="rz-text-truncate">
+                        <b>@(firstMedia?.Product?.ApiId)</b>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12">
+                        <b>@(firstMedia?.Product?.Name)</b>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                @if (selectedProduct != null)
+                    @foreach (var (mediaFile, index) in mediaFileGroup.MediaFiles.Select((mediaFile, index) => (mediaFile, index)))
+                    {
+                        <RadzenCard class="@(selectedProduct.SelectedMedias[index].Selected ? "p-card selected" : "p-card")" draggable="true"
+                                    ondragover="event.preventDefault();event.target.closest('.p-card').classList.add('hover')"
+                                    ondragleave="event.target.closest('.p-card').classList.remove('hover')"
+                                    @ondragstart="(e)=>OnDragStart(e,mediaFile, mediaFileGroup)"
+                                    @ondrop="(e)=> OnDrop(e, mediaFile)"
+                                    Style="cursor:grab" ContextMenu="@((arg)=> OnCardContextMenu(arg,mediaFile))"
+                                    @onclick="()=>selectedProduct!.SelectedMedias[index].Selected = !selectedProduct!.SelectedMedias[index].Selected">
+                            @if (mediaFile.ThumbnailFile != null)
+                            {
+                                <RadzenImage Path="@mediaFile.ThumbnailFile.WebUrl" class="@(mediaFile.Hidden?"hidden-file":"")" Style="width: 100%; height: auto; border-radius: 1rem;" />
+                            }
+
+                            <hr style="border: none; background-color: rgba(0,0,0,.2); height: 1px; margin: 1rem 0;" />
+                            <RadzenRow dir="ltr">
+                                <RadzenColumn Size="12" class="rz-text-truncate">
+                                    <RadzenButton Click="async()=>await ShowFullImage(mediaFile.MediaFile?.WebUrl ?? string.Empty)" Icon="visibility" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Light" />
+                                    @(mediaFile.MediaFile?.Name)
+                                </RadzenColumn>
+                                @*         <RadzenColumn Size="2" class="rz-text-truncate">
+                        </RadzenColumn> *@
+                            </RadzenRow>
+                        </RadzenCard>
+
+                    }
+                @{
+                    int emptyRowsNeeded = 5 - (mediaFileGroup.MediaFiles.Count() % 5);
+                    if (emptyRowsNeeded == 5)
+                    {
+                        emptyRowsNeeded = 0;
+                    }
+
+                }
+                @for (int i = 0; i < emptyRowsNeeded; i++)
+                {
+                    <RadzenRow class="p-card">
+                        empty
+                    </RadzenRow>
+                }
+
+            </Template>
+        </RadzenDataList>
+
+    </RadzenRow>
+
+    <RadzenRow AlignItems="AlignItems.Center">
+        @*         <RadzenColumn Size="12" SizeMD="6">
+        <RadzenText Text="Currencies" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn> *@
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Disabled="@(selectedProductMedias?.All(x=>!x.HasAnySelected) == true)" Click="async() => await Publish()" Icon="add_circle_outline" Text="Publish" Variant="Variant.Flat" ButtonStyle="ButtonStyle.Success" />
+                <RadzenButton Disabled="@(selectedProductMedias?.All(x=>!x.HasAnySelected) == true)" Click="()=> ShowHide(null)" Icon="visibility_off" Text="Hide Selected" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Warning" />
+                <RadzenButton Disabled="@(selectedProductMedias?.All(x=>!x.HasAnySelected) == true)" Click="()=>Delete(null)" Icon="delete" Text="Delete Selected" Variant="Variant.Outlined" ButtonStyle="ButtonStyle.Danger" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+
+
+</RadzenStack>
+
+<div>
+    <div class="modal fade" id="FullImageModal" tabindex="-1" @ref="@FullImageModalElement" aria-labelledby="FullImageModalLabel" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <img src="@FullImageModalSrc" class="mx-auto w-100" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .p-card {
+        flex: 1 1 calc(100% / 7);
+        width: calc(100% / 7);
+    }
+
+    .hidden-file {
+        opacity: 0.4;
+    }
+
+    .hover {
+        border: 2px solid #0d6efd5e !important;
+        /*        background-color: #0d6efd5e !important; */
+    }
+
+    .p-card.selected {
+        background-color: #0d6efd5e !important;
+    }
+
+    .modal-backdrop {
+        display: none !important;
+    }
+
+    .modal {
+        background: none;
+    }
+</style>

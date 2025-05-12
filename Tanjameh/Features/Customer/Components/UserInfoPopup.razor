@@ -1,0 +1,60 @@
+﻿@rendermode InteractiveServer
+
+@using Tanjameh.Features.Customer.Models
+@using Tanjameh.Features.Customer.Services
+
+@inject AuthenticationService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="dropdown">
+    <a class="nav-link" id="userDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <svg class="" height="1.3em" width="1.3em" focusable="false" fill="currentColor" viewBox="0 0 24 24" aria-labelledby="your-account-8883409" role="img" aria-hidden="false"><title id="your-account-8883409">پروفایل</title><path d="M21.645 22.866a28.717 28.717 0 0 0-6.46-7.817c-2.322-1.892-4.048-1.892-6.37 0a28.74 28.74 0 0 0-6.46 7.817.75.75 0 0 0 1.294.76 27.264 27.264 0 0 1 6.113-7.413A3.98 3.98 0 0 1 12 15.125a3.81 3.81 0 0 1 2.236 1.088 27.252 27.252 0 0 1 6.115 7.412.75.75 0 1 0 1.294-.76zM12 12.002A6.01 6.01 0 0 0 18.003 6 6.003 6.003 0 1 0 12 12.002zm0-10.505a4.502 4.502 0 1 1 0 9.005 4.502 4.502 0 0 1 0-9.005z"></path></svg>
+    </a>
+    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+        @if (CurrentUser != null)
+        {
+            <h6 class="dropdown-header">@CurrentUser.FirstName @CurrentUser.LastName</h6>
+            <a class="dropdown-item" href="/profile">@Localization.Profile</a>
+            <div class="dropdown-divider"></div>
+            <form action="Account/Logout" method="post">
+                <AntiforgeryToken />
+                <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                <button type="submit" class="dropdown-item">@Localization.Logout</button>
+            </form>
+            
+        }
+        else
+        {
+            <a class="dropdown-item" href="/authenticate">@Localization.Login</a>
+            <a class="dropdown-item" href="/authenticate">@Localization.Register</a>
+        }
+    </div>
+</div>
+
+@code {
+    private Core.Entities.Customer? CurrentUser { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await AuthService.GetCurrentUserAsync();
+    }
+
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

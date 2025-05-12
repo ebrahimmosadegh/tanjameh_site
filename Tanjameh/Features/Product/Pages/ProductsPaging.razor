@@ -1,0 +1,83 @@
+﻿@using Radzen.Blazor
+@using Tanjameh.Features.Category.Components
+@using Tanjameh.Features.Product.Components
+
+@page "/men/{MenCategorySlug}"
+@page "/women/{WomenCategorySlgu}"
+@page "/Sale/{SaleSlgu}"
+@page "/brand/{BrandSlug}"
+@page "/trend/{ProductTypeSlug}"
+@page "/search"
+
+@rendermode InteractiveServer
+
+<PageTitle>تن جامه - @Title</PageTitle>
+
+<HeadContent>
+    <RadzenTheme @rendermode="@InteractiveServer" Theme="default" />
+</HeadContent>
+
+@if (ProductsView is not null)
+{
+    <div class="container-md pt-5">
+        <!-- Breadcrumb -->
+        @*   <nav aria-label="breadcrumb">
+    <ol class="breadcrumb b-animate b-dark">
+    <li class="breadcrumb-item">
+    <a href="./?gender=men" class="text-decoration-none text-dark fw-semibold d-inline-block">مردانه</a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+    لباس
+    </li>
+    </ol>
+    </nav> *@
+        <h1 class="fw-semibold mb-5">
+            @Title
+        </h1>
+        <div class="row my-4">
+            <div class="col-12 col-lg-3 b-animate b-dark brand-cat lh-lg">
+                @if (ProductPageType is ProductPageType.Men or ProductPageType.Women)
+                {
+                    <ProductPageCategories ProductPageType="@ProductPageType" CategorySlug="@PageSlug" />
+                }
+                <hr class="d-lg-none">
+            </div>
+            <div class="col-12 col-lg-9">
+                <!-- filter box -->
+                <ProductFilter AllFilterView="FilterView" ApplyFilters="@ApplyFilters"></ProductFilter>
+                <div class="hstack gap-2 text-muted my-3">
+                    <h6>
+                        @ProductsView.TotalCount محصول
+                    </h6>
+                </div>
+                <!-- products -->
+                <div class="row row-cols-2 row-cols-sm-3 g-3">
+
+                    @foreach (var product in ProductsView.Data)
+                    {
+                        <div class="col card rounded-0 border-0">
+                            <ProductCell ProductPreview="product"></ProductCell>
+                        </div>
+                    }
+
+
+                </div>
+
+                <!-- pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-5">
+                        <li class="page-item @(PageNumber == null ? "disabled" : "")"><a @onclick="PreviousPage" class="page-link border-0 text-reset"><i class="fa-solid fa-chevron-right"></i></a></li>
+                        صفحه @ProductsView.PageNumber از @ProductsView.TotalPages صفحه , نمایش @ProductsView.PageSize از @ProductsView.TotalCount نتیجه
+                        <li class="page-item @((PageNumber ?? 1) >= ProductsView.TotalPages ? "disabled" : "")"><a @onclick="NextPage" class="page-link border-0 text-reset"><i class="fa-solid fa-chevron-left"></i></a></li>
+                        @*                         <li class="page-item"><a @onclick="NextPage" class="page-link border-0 text-reset"><i class="fa-solid fa-chevron-left"></i></a></li>
+                    *@
+                    </ul>
+                </nav>
+
+
+                <!-- end section -->
+            </div>
+        </div>
+    </div>
+}
+

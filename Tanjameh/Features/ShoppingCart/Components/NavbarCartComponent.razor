@@ -1,0 +1,94 @@
+﻿@rendermode InteractiveServer
+@implements  IDisposable
+
+@using Tanjameh.Features.ShoppingCart.Services
+@inject IShoppingCartService ShoppingCartService
+@inject  IJSRuntime JSRuntime
+
+<div class="@(!IsMobile ? "dropdown" : "")">
+    @if (itemCount > 0)
+    {
+        <span class="items-basket position-absolute top-0 end-0 badge rounded-circle bg-orange p-1 font-x-s">@itemCount</span>
+    }
+
+
+    @if (IsMobile)
+    {
+        <a href="/cart" class="cart-icon nav-link">
+            <svg height="1.3em" width="1.3em" focusable="false" fill="currentColor" viewBox="0 0 24 24" aria-labelledby="your-bag-8883411" role="img" aria-hidden="false">
+                <title id="your-bag-8883411">سبد خرید</title><path d="M20.677 13.654a5.23 5.23 0 0 0 1.073-3.194c-.01-2.632-1.968-4.78-4.5-5.137V5.25a5.25 5.25 0 0 0-10.5 0v.059a5.224 5.224 0 0 0-2.444 1.014 5.23 5.23 0 0 0-.983 7.33A5.623 5.623 0 0 0 6.375 24h11.25a5.623 5.623 0 0 0 3.052-10.346zM12 1.5a3.75 3.75 0 0 1 3.75 3.75h-7.5A3.75 3.75 0 0 1 12 1.5zm5.625 21H6.375a4.122 4.122 0 0 1-1.554-7.942.75.75 0 0 0 .214-1.256A3.697 3.697 0 0 1 3.75 10.5a3.755 3.755 0 0 1 3-3.674V9a.75.75 0 0 0 1.5 0V6.75h7.5V9a.75.75 0 1 0 1.5 0V6.826a3.755 3.755 0 0 1 3 3.674c0 1.076-.47 2.1-1.285 2.802a.75.75 0 0 0 .213 1.256 4.122 4.122 0 0 1-1.553 7.942z"></path>
+            </svg>
+        </a>    
+    }
+    else
+    {
+        <div id="cartDropdown" class="cart-icon nav-link" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <svg height="1.3em" width="1.3em" focusable="false" fill="currentColor" viewBox="0 0 24 24" aria-labelledby="your-bag-8883411" role="img" aria-hidden="false">
+                <title id="your-bag-8883411">سبد خرید</title><path d="M20.677 13.654a5.23 5.23 0 0 0 1.073-3.194c-.01-2.632-1.968-4.78-4.5-5.137V5.25a5.25 5.25 0 0 0-10.5 0v.059a5.224 5.224 0 0 0-2.444 1.014 5.23 5.23 0 0 0-.983 7.33A5.623 5.623 0 0 0 6.375 24h11.25a5.623 5.623 0 0 0 3.052-10.346zM12 1.5a3.75 3.75 0 0 1 3.75 3.75h-7.5A3.75 3.75 0 0 1 12 1.5zm5.625 21H6.375a4.122 4.122 0 0 1-1.554-7.942.75.75 0 0 0 .214-1.256A3.697 3.697 0 0 1 3.75 10.5a3.755 3.755 0 0 1 3-3.674V9a.75.75 0 0 0 1.5 0V6.75h7.5V9a.75.75 0 1 0 1.5 0V6.826a3.755 3.755 0 0 1 3 3.674c0 1.076-.47 2.1-1.285 2.802a.75.75 0 0 0 .213 1.256 4.122 4.122 0 0 1-1.553 7.942z"></path>
+            </svg>
+        </div>
+    }
+
+
+    <div class="cart-popup-container dropdown-menu dropdown-menu-right" aria-labelledby="cartDropdown">
+        <ShoppingCartComponent IsPopup="true"/>
+    </div>
+</div>
+
+
+@code {
+    private int itemCount = 0;
+    private bool IsMobile = false;
+
+    protected override Task OnInitializedAsync()
+    {
+        ShoppingCartService.OnChange += UpdateItemCount;
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            UpdateItemCount();
+        }
+
+        var isMobile = await JSRuntime.InvokeAsync<bool>("isMobile");
+        if (isMobile != this.IsMobile)
+        {
+            this.IsMobile = isMobile;
+            StateHasChanged();
+        }
+    }
+
+    private async void UpdateItemCount()
+    {
+        var cart = await ShoppingCartService.GetCartAsync();
+        itemCount = cart?.Items?.Sum(i => i.Quantity) ?? 0;
+        StateHasChanged();
+    }
+
+
+    public void Dispose()
+    {
+        ShoppingCartService.OnChange -= UpdateItemCount;
+    }
+
+
+}
+
+<style>
+    .cart-icon {
+        position: relative;
+        cursor: pointer;
+    }
+
+
+    .cart-popup-container {
+        position: relative;
+    }
+
+        .cart-popup-container .header {
+            display: none;
+        }
+</style>

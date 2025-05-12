@@ -1,0 +1,306 @@
+﻿@rendermode InteractiveServer
+@page "/cart"
+
+@using Tanjameh.Features.Currency.Services
+@using Tanjameh.Features.ShoppingCart.Services
+@inject IShoppingCartService ShoppingCartService
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<div class="cart-main @(IsPopup ? "cart-popup" : "container mt-4 cart-full")">
+    <div class="row">
+
+        <div class="@(IsPopup ? "col-lg-12" : "col-lg-8")">
+            <h2 class="header"> سبد خرید@(cart?.Items?.Count > 0 ? $"({cart.Items.Sum((x=>x.Quantity))} مورد)": "")</h2>
+            @if (cart?.Items.Count > 0)
+            {
+                <div class="cart-items">
+                    @foreach (var item in cart.Items)
+                    {
+                        <div class="cart-item">
+                            <img src="@item.ProductThumbnailUrl" alt="@item.ProductName" class="product-thumbnail"/>
+                            <div class="product-details">
+                                <span class="product-name">@item.ProductName</span>
+                                <span class="product-price">@(ExhangeAndFormat(item.UnitPrice, item.CurrencyId ?? 1))</span>
+                                <span class="product-color">رنگ: @item.Color</span>
+                                <span class="product-size">سایز: @item.Size</span>
+                                @if (IsPopup)
+                                {
+                                    <span class="product-quantity">تعداد: @item.Quantity</span>
+                                }
+                            </div>
+                            @if (!IsPopup)
+                            {
+                                <input type="number" class="form-control quantity-input" value="@item.Quantity"
+                                       @onchange="@(e => UpdateQuantity(item.ProductId, item.ProductVariantId, int.Parse(e.Value.ToString())))"/>
+                            }
+                            <button class="btn btn-remove"
+                                    @onclick="@(() => RemoveItem(item.ProductId, item.ProductVariantId, item.Quantity))">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+
+                @if (IsPopup)
+                {
+                    <hr/>
+                    <div class="total">
+                        جمع کل: @TotalPriceText
+                    </div>
+                }
+
+                <div class="actions">
+                    @if (IsPopup)
+                    {
+                        <button class="btn btn-dark" @onclick="ViewFullCart">مشاهده سبد خرید</button>
+                    }
+                    else
+                    {
+                        @* <button class="btn btn-light" @onclick="ClearCart">خالی کردن سبد خرید</button> *@
+                    }
+                </div>
+            }
+            else
+            {
+                <p>سبد خرید شما خالی است.</p>
+            }
+        </div>
+
+        @if (!IsPopup)
+        {
+            <div class="col-lg-4">
+                <div class="checkout-box text-center">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>جمع کل</span>
+                        <span>@TotalPriceText</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>هزینه ارسال</span>
+                        <span></span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>مجموع 
+                            @* <small class="text-muted">شامل مالیات بر ارزش افزوده</small> *@
+                            </span>
+                        <span>۴۹.۹۹ پوند</span>
+                    </div>
+                    <button class="checkout-btn mt-3" @onclick="Checkout">ادامه به صفحه پرداخت</button>
+                    <hr>
+                    <p>ما روش‌های پرداخت مختلفی را می‌پذیریم</p>
+                </div>
+            </div>
+        }
+
+
+    </div>
+</div>
+
+@code {
+    private Core.Entities.ShoppingCart? cart;
+    private bool isLoaded = false;
+
+    [Parameter] public bool IsPopup { get; set; }
+
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private string TotalPriceText = "";
+
+    protected override void OnInitialized()
+    {
+        ShoppingCartService.OnChange += CartChange;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ShoppingCartService.MergeLocalCartWithUserCartAsync();
+            await LoadCart();
+            isLoaded = true;
+            StateHasChanged();
+        }
+    }
+
+    private async void CartChange()
+    {
+        await LoadCart();
+        StateHasChanged();
+    }
+
+    private async Task LoadCart()
+    {
+        cart = await ShoppingCartService.GetCartAsync(true);
+
+        if (cart != null)
+        {
+            var totalPrice = cart.Items.Sum(s => CurrencyService.Exchange(s.UnitPrice * s.Quantity, s.CurrencyId ?? 2, 1));
+            TotalPriceText = CurrencyService.Formatting(totalPrice, 1) ?? "";
+        }
+    }
+
+    private string ExhangeAndFormat(decimal amount, int fromCurrency)
+    {
+        return CurrencyService.ExchangeAndFormatting(amount, fromCurrency, 1) ?? "";
+    }
+
+    private async Task UpdateQuantity(int productId, int? productVariantId, int quantity)
+    {
+        await ShoppingCartService.UpdateQuantityAsync(productId, productVariantId, quantity);
+    }
+
+    private async Task RemoveItem(int productId, int? productVariantId, int quantity)
+    {
+        if (IsPopup)
+        {
+            if (quantity > 1)
+            {
+                await ShoppingCartService.UpdateQuantityAsync(productId, productVariantId, quantity - 1);
+            }
+            else
+            {
+                await ShoppingCartService.RemoveFromCartAsync(productId, productVariantId);
+            }
+        }
+        else
+        {
+            await ShoppingCartService.RemoveFromCartAsync(productId, productVariantId);
+        }
+    }
+
+    private async Task ClearCart()
+    {
+        await ShoppingCartService.ClearCartAsync();
+    }
+
+    private void Checkout()
+    {
+        NavigationManager.NavigateTo("/checkout");
+    }
+
+    private void ViewFullCart()
+    {
+        NavigationManager.NavigateTo("/cart");
+    }
+
+    public void Dispose()
+    {
+        ShoppingCartService.OnChange -= StateHasChanged;
+    }
+
+}
+
+<style>
+
+
+    .cart-popup {
+        position: absolute;
+        left: 0;
+        top: 100%;
+        width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+        background-color: white;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        z-index: 1000;
+        font-size: 14px;
+    }
+
+    .cart-popup h2 {
+        font-size: 18px;
+        margin-bottom: 15px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+    }
+
+    .cart-items {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .product-details {
+        flex: 1;
+        margin-left: 15px;
+    }
+
+    .product-name, .product-price, .product-color, .product-size, .product-quantity {
+        display: block;
+    }
+
+    .product-quantity {
+        margin-top: 4px;
+        font-weight: 600;
+    }
+
+    .btn-remove {
+        color: #2c3034;
+        background-color: transparent;
+        border: none;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    .btn-remove:hover {
+        background-color: #d4d4d4;
+    }
+
+    .quantity-input {
+        width: 60px !important;
+        text-align: center;
+        margin: 30px;
+    }
+
+    .total {
+        font-weight: bold;
+        font-size: 16px;
+        margin-top: 15px;
+        text-align: left;
+    }
+
+    .actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+    }
+
+    .cart-main img {
+        height: 7rem;
+        width: 5rem;
+        object-fit: cover;
+    }
+
+    .cart-main.cart-full img {
+        margin-left: 15px;
+        height: 14rem;
+        width: 10rem;
+    }
+
+
+
+    .checkout-box {
+        border: 1px solid #ddd;
+        padding: 20px;
+        max-width: 300px;
+        margin: auto;
+        background-color: #f9f9f9;
+    }
+    .checkout-btn {
+        background-color: #000;
+        color: #fff;
+        width: 100%;
+        padding: 10px;
+        border: none;
+        font-weight: bold;
+        text-align: center;
+    }
+</style>

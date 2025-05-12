@@ -1,0 +1,15 @@
+/* General RTL reinforcement */
+body {
+    text-align: right; /* Default text alignment for RTL */
+}
+
+/* Ensure specific components align correctly if needed */
+.nav-pills .nav-link {
+    text-align: right; /* Ensure panel links align right */
+}
+
+/* Adjust margins/paddings if Bootstrap RTL doesn't cover everything */
+.checkout-steps .step-separator {
+    margin: 0 0.5rem; /* Adjust spacing for separators */
+}
+

@@ -1,0 +1,70 @@
+﻿@using MediatR
+@using Tanjameh.Features.Category.Models
+@using Tanjameh.Features.Category.Queries
+@using Tanjameh.Features.Product.Pages
+@code {
+
+    [Inject]
+    public IMediator Mediator { get; set; }
+
+    [Parameter, EditorRequired]
+    public string CategorySlug { get; set; }
+
+    [Parameter, EditorRequired]
+    public ProductPageType ProductPageType { get; set; }
+
+    private Core.Entities.Category? currentCategory;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentCategory = await Mediator.Send(new ProductsPageCategoriesQuery(CategorySlug));
+
+        if (currentCategory == null)
+            return;
+
+
+    }
+
+
+    private string GetUrl(string categorySlug)
+    {
+        return $"./{ProductPageType.ToString()}/{categorySlug}";
+    }
+}
+
+<nav class="navbar navbar-light bg-white flex-column align-items-start">
+    <div class="container-fluid flex-column align-items-start">
+        @if (currentCategory != null)
+        {
+            <span class="navbar-brand mb-0 h1">@(currentCategory.Name)</span>
+            <ul class="navbar-nav flex-column">
+                @foreach (var category in currentCategory.SubCategories?.Where(x => x.Mark) ?? [])
+                {
+                    <li class="nav-item ms-3">
+                        <a class="nav-link @(category.Slug == CategorySlug ? "active":"")" href="@category.Url">@category.Name</a>
+                        @if (category.SubCategories?.Where(x => x.Mark)?.Count() > 0)
+                        {
+                            <ul class="navbar-nav flex-column ms-3">
+                                @foreach (var subcategory in category.SubCategories.Where(x => x.Mark))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link @(category.Slug == CategorySlug ? "active":"")" href="#">@subcategory</a>
+                                    </li>
+                                }
+                            </ul>
+                        }
+
+                    </li>
+                }
+            </ul>
+        }
+
+    </div>
+</nav>
+
+<style>
+    .navbar-nav .nav-link.active, .navbar-nav .show > .nav-link {
+        font-weight: bold;
+    }
+</style>

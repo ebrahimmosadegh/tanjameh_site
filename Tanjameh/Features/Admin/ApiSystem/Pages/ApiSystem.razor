@@ -1,0 +1,28 @@
+﻿@page "/admin/ApiSystem"
+
+@rendermode InteractiveServer
+@using Tanjameh.BackgroundServices
+@using Tanjameh.BackgroundServices.ViewModel
+@inject IServiceProvider ServiceProvider;   
+
+<h3>ApiSystem</h3>
+<div class="mx-3 my-2">
+
+<button type="button" class="btn btn-primary" @onclick="StartNow">Test Fetch Category</button>
+</div>
+@code {
+
+
+    public void StartNow()
+    {
+        StaticConfigs<AsosGetFormat>.StartWorkerService = true;
+        StaticConfigs<AsosGetFormat>.GetFormat
+        = new AsosGetFormat
+            {
+                AsosApiType = AsosApiType.Category
+            };
+
+        var allBackgroundServices = ServiceProvider.GetServices<IHostedService>();
+           allBackgroundServices.FirstOrDefault(x => x.GetType() == typeof(MainWorkerService))?.StartAsync(CancellationToken.None);
+    }
+}

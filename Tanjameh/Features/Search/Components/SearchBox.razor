@@ -1,0 +1,32 @@
+﻿ @rendermode InteractiveServer
+<!-- Icon -->
+  <link rel="stylesheet"
+        href="https://unicons.iconscout.com/release/v4.0.0/css/line.css" />
+  <!-- Code -->
+  <div class="search-input-box">
+      <input type="text" placeholder="جستجو..." @onkeyup="KeyUp" @oninput="Input" @bind="SearchText" />
+      <span class="search">
+          <i class="uil uil-search search-icon"></i>
+      </span>
+      @* <i class="uil uil-times close-icon"></i> *@
+  </div>
+
+  <!-- Show Box for search items -->
+  <div class="quick-search-results @(ShowResults ? "show" : "")">
+      @if (SearchResults != null && SearchResults.Any())
+      {
+          @foreach (var result in SearchResults)
+          {
+              <a class="search-result-item" href="@result.Url">
+                  <span class="result-title">@result.Name</span>
+                  <span class="result-description">@result.Description</span>
+              </a>
+          }
+      }
+      else
+      {
+          <div class="no-results">نتیجه‌ای یافت نشد</div>
+      }
+  </div>
+
+

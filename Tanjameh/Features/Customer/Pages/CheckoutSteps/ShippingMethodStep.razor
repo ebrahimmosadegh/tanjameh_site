@@ -1,0 +1,30 @@
+@* Placeholder for Shipping Method Step *@
+@using Microsoft.AspNetCore.Components
+
+<h4>Step 3: Shipping Method</h4>
+
+<p>Select your preferred shipping method.</p>
+
+@* TODO: Implement shipping method selection UI based on selected address *@
+
+<div class="d-flex justify-content-between mt-4">
+    <button class="btn btn-secondary" @onclick="GoBack">Previous: Address</button>
+    <button class="btn btn-primary" @onclick="ProceedToNextStep">Next: Payment</button>
+</div>
+
+@code {
+    [Parameter] public EventCallback OnNext { get; set; }
+    [Parameter] public EventCallback OnPrevious { get; set; }
+
+    private async Task ProceedToNextStep()
+    {
+        // TODO: Validate shipping method selection
+        await OnNext.InvokeAsync();
+    }
+
+    private async Task GoBack()
+    {
+        await OnPrevious.InvokeAsync();
+    }
+}
+

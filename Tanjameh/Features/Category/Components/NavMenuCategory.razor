@@ -1,0 +1,111 @@
+﻿@using Tanjameh.Features.Category.Models
+@using Tanjameh.Features.Category.Queries
+@inject MediatR.IMediator Mediator
+
+
+@code {
+
+    [Parameter, EditorRequired]
+    public HomeMenuType HomeMenuType { get; set; }
+
+    [Parameter]
+    public bool IsMobile { get; set; }
+
+
+    private IReadOnlyCollection<Core.Entities.Category> Categories = new List<Core.Entities.Category>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategories();
+    }
+
+    private async Task LoadCategories()
+    {
+        Categories = await Mediator.Send(new GetCategoriesByTypeQuery(HomeMenuType));
+    }
+
+    private string GetUrl(string categorySlug)
+    {
+        return $"./{HomeMenuType.ToString()}/{categorySlug}";
+    }
+}
+
+
+@if (IsMobile)
+{
+    <div class="row g-2">
+        @foreach (var category in Categories)
+        {
+            <div class="col-6">
+                <div class="card rounded-0 border-0">
+                    <a href="@GetUrl(category.Slug!)" class="text-dark text-decoration-none">
+                        <img src="@category.MainPictureFileName" class="card-img-top" alt="@category.Name">
+                        <div class="card-body">
+                            <p class="card-text">@category.Name</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="d-lg-block d-none">
+        <ul class="navbar-nav">
+            @foreach (var category in Categories)
+            {
+                @if(category.SubCategories.Count() > 0)
+                {
+                              <li class="dropdown has-megamenu has-menu">
+                    <a class="nav-link dropdown-toggle menu-toggle" href="@GetUrl(category.Slug!)" aria-expanded="false">@category.Name </a>
+                    <div class="i-menu megamenu rounded-0">
+                        <div class="container-lg">
+                            <div class="row b-animate b-dark">
+                                <div class="col">
+                                    <h5 class="text-black-50 mt-5"></h5>
+                                    <div class="d-grid cat">
+                                        @foreach (var subCategory in category.SubCategories ?? [])
+                                        {
+                                            <a href="@GetUrl(subCategory.Slug!)">
+                                                <i class="fa-solid fa-shirt"></i>
+                                                @subCategory.Name
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="col">
+                                </div>
+                                <div class="col">
+                                    <div class="card bg-danger rounded-0 border-0 ps-4 mt-5" style="max-width: 18rem;">
+                                        <a href="@GetUrl(category.Slug!)"><img src="@category.MainPictureFileName" class="card-img-top" alt="..."></a>
+                                        <div class="card-body">
+                                            <p class="card-text b-animate b-light">
+                                                <a href="@GetUrl(category.Slug!)" class="text-white text-decoration-none ">
+                                                    خرید
+                                                    <i class="fa-solid fa-arrow-left"></i>
+                                                </a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                     <a class="nav-link" href="@GetUrl(category.Slug!)" >@category.Name</a>
+                     </li>
+                }
+
+        }
+
+        </ul>
+    </div>
+
+}
+

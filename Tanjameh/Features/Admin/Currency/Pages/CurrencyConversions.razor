@@ -1,0 +1,72 @@
+﻿@page "/admin/currency/conversions"
+
+<PageTitle>تبدیل ارز ها</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="تبدیل ارز" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenRow>
+      <RadzenColumn SizeMD=12>
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="false" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="false" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@currencyConversions" RowUpdate="@GridRowUpdate" RowCreate="@GridRowCreate" TItem="Core.Entities.CurrencyConversion">
+            <Columns>
+                <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Property="Id" Title="Id">
+                </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Property="FromCurrency.CurrencyName" Title="از">
+                  <EditTemplate Context="currencyConversion">
+                            <RadzenDropDown Data="@currenciesForFromCurrencyId" TextProperty="CurrencyName" ValueProperty="Id" AllowClear=true
+                        Placeholder="انتخاب ارز مبدا" style="display: block; width: 100%" @bind-Value="@currencyConversion.FromCurrencyId" Name="FromCurrencyId"
+                           />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                    <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Property="ToCurrency.CurrencyName" Title="به">
+                  <EditTemplate Context="currencyConversion">
+                            <RadzenDropDown Data="@currenciesForToCurrencyId" TextProperty="CurrencyName" ValueProperty="Id" AllowClear=true
+                        Placeholder="انتخاب رمز مقصد" style="display: block; width: 100%" @bind-Value="@currencyConversion.ToCurrencyId" Name="ToCurrencyId"
+                           />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Property="ExchangeRate" Title="Exchange Rate">
+                  <EditTemplate Context="currencyConversion">
+                      <RadzenNumeric style="display: block; width: 100%" @bind-Value="@currencyConversion.ExchangeRate" Name="ExchangeRate" />
+                      <RadzenRequiredValidator Component="ExchangeRate" Text="ExchangeRate is required" style="position: absolute;" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Property="LastUpdated" Title="Last Updated">
+                  <EditTemplate Context="currencyConversion">
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Property="Notes" Title="Notes">
+                  <EditTemplate Context="currencyConversion">
+                      <RadzenTextBox style="display: block; width: 100%" @bind-Value="@currencyConversion.Notes" Name="Notes" />
+                  </EditTemplate>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="Core.Entities.CurrencyConversion" Filterable="false" Sortable="false" Width="156px" TextAlign="TextAlign.Center">
+                    <EditTemplate Context="currencyConversion">
+                        <RadzenButton Icon="check" ButtonStyle="ButtonStyle.Success" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                            style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                            Click=@(args => SaveButtonClick(args, currencyConversion)) @onclick:stopPropagation="true" />
+                        <RadzenButton Icon="close" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                            Click=@(args => CancelButtonClick(args, currencyConversion)) @onclick:stopPropagation="true" />
+                    </EditTemplate>
+                    <Template Context="currencyConversion">
+
+                        <RadzenButton Icon="edit" ButtonStyle="ButtonStyle.Light" Variant="Variant.Flat" Size="ButtonSize.Medium"
+                            style="margin-top: 0.25rem; margin-right: 0.25rem; margin-bottom: 0.25rem"
+                            Click=@(args => EditButtonClick(args, currencyConversion)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenColumn>
+  </RadzenRow>
+</RadzenStack>
